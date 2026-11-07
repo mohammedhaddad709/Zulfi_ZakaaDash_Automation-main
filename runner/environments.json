@@ -1,0 +1,52 @@
+{
+  "_comment": "Seed system specs (spec 5.5). Systems-page edits are stored by the runner store, never here. Logins are environment variables passed to the test JVM only (AGENTS.md); secret defaults are never stored.",
+  "systems": {
+    "zulfi": {
+      "activeSystem": "zulfi",
+      "bugPrefix": "ZUL",
+      "urls": [
+        {"label": "Portal URL", "targets": ["zulfi.baseUrl"], "requireHttps": true}
+      ],
+      "envs": {
+        "current": {"Portal URL": "https://zulfi.zakaadash.com/zakaadashZulfi-portal-vue/"},
+        "other": {"Portal URL": ""}
+      },
+      "logins": [
+        {"label": "User", "env": "ZULFI_USER", "default": ""},
+        {"label": "Password", "env": "ZULFI_PASSWORD", "default": "", "secret": true}
+      ],
+      "parallelNote": "Read-only suites can run up to 4 classes in parallel; analysis classes stay in one serial group.",
+      "maxThreads": 4,
+      "serialGroups": [
+        {"name": "Zulfi - analysis fixtures", "match": [".zulfi.features.analysis."]}
+      ],
+      "testTypes": []
+    },
+    "zakaadash": {
+      "activeSystem": "zakaadash",
+      "bugPrefix": "ZKD",
+      "serialOnly": true,
+      "urls": [
+        {"label": "Web URL", "targets": ["zakaadash.baseUrl"]}
+      ],
+      "envs": {
+        "dev": {"Web URL": "https://app.dev.zakaadash.com/innova-vue"},
+        "other": {"Web URL": ""}
+      },
+      "logins": [
+        {"label": "Email", "env": "ZAKAADASH_EMAIL", "default": ""},
+        {"label": "Password", "env": "ZAKAADASH_PASSWORD", "default": "", "secret": true}
+      ],
+      "parallelNote": "1 at a time: all flows share one account and clean data by name prefix (AGENTS.md).",
+      "maxThreads": 1,
+      "serialGroups": [],
+      "testTypes": [
+        {"group": "smoke", "label": "Smoke tests"},
+        {"group": "sanity", "label": "Sanity tests"},
+        {"group": "regression", "label": "Regression tests"},
+        {"group": "critical", "label": "Critical tests"},
+        {"group": "e2e", "label": "E2E journeys"}
+      ]
+    }
+  }
+}

@@ -1,0 +1,13 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="ZakaaDash - E2E" verbose="1">
+    <test name="E2E Journeys">
+        <groups>
+            <run>
+                <include name="e2e"/>
+            </run>
+        </groups>
+        <packages>
+            <package name="com.taf.systems.zakaadash.tests.e2e"/>
+        </packages>
+    </test>
+</suite>

@@ -1,0 +1,48 @@
+# Phase 4 — Browser Management
+
+Read and follow GEMINI.md strictly.
+
+Implement Phase 4 only: Browser Management.
+
+Goal:
+Move browser creation and lifecycle into framework classes.
+
+Use:
+- Current project stack
+- ThreadLocal WebDriver
+- Local Chrome execution
+- Local Edge execution
+
+New technology to add:
+- None
+
+Scope:
+- Driver classes
+- Base test setup if needed
+- Existing test setup
+
+Tasks:
+1. Create BrowserType enum.
+2. Create DriverManager using ThreadLocal.
+3. Create DriverFactory.
+4. Support Chrome and Edge only.
+5. Read browser from Owner config.
+6. Use Selenium Manager implicitly.
+7. Move browser setup out of the test class.
+8. Move browser teardown out of the test class.
+9. Ensure driver is always quit.
+10. Ensure ThreadLocal is removed after quit.
+
+Acceptance criteria:
+- Test does not create ChromeDriver directly.
+- Browser is controlled by DriverFactory and DriverManager.
+- Chrome works.
+- Edge works when browser=edge.
+- mvn clean test runs successfully.
+
+Run/validation command:
+- mvn clean test
+
+Important:
+Do not add new dependencies.
+Keep browser management simple.

@@ -1,0 +1,43 @@
+# Phase 16 — Generate Page Objects from Discovery
+
+Read and follow AGENTS.md strictly.
+
+Implement Phase 16 only: Generate Page Objects from Discovery.
+
+Goal:
+Create Page Objects from approved discovery output.
+
+Use:
+- Current project stack
+- Existing Page Object Model
+
+New technology to add:
+- None
+
+Scope:
+- Page Object classes only
+
+Input:
+- docs/discovery/locator-catalog.md
+- docs/discovery/page-object-recommendations.md
+
+Tasks:
+1. Read discovery docs.
+2. Create Page Objects for approved high-priority pages only.
+3. Use stable locators only.
+4. Mark weak locators with TODO.
+5. Use BasePage methods.
+6. Do not add assertions inside Page Objects.
+7. For method not implemented you can implement them with the same way as other methods
+
+Acceptance criteria:
+- Page Objects compile.
+- Weak locators are marked.
+- mvn clean compile passes.
+
+Run/validation command:
+- mvn clean compile
+
+Important:
+Do not create tests in this phase.
+Do not add dependencies.

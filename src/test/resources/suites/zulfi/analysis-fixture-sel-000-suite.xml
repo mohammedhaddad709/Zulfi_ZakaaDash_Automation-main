@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- Use: mvn test -DsuiteXmlFile=... -Danalysis.fixture.selection.onlyIndex=0 -->
+<suite name="Official Fixture Selection Smoke" verbose="1" parallel="false">
+    <test name="Fixture Discovery">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.analysis.OfficialFixtureDiscoveryTest"/>
+        </classes>
+    </test>
+    <test name="Index 0 Selection">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.analysis.OfficialFixtureSelectionTest"/>
+        </classes>
+    </test>
+</suite>

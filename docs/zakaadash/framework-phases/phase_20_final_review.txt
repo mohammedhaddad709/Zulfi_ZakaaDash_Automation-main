@@ -1,0 +1,50 @@
+# Phase 20 — Final Review
+
+Read and follow GEMINI.md strictly.
+
+Implement Phase 20 only: Final Review.
+
+Goal:
+Review the full framework after documentation.
+
+Use:
+- Current project stack
+
+New technology to add:
+- None
+
+Scope:
+- Review and small cleanup only
+
+Tasks:
+1. Review dependencies.
+2. Review package structure.
+3. Review project structure.
+4. Review Page Objects.
+5. Review flow classes if implemented.
+6. Review TestNG tests.
+7. Review grouped suites if implemented.
+8. Review parallel execution setup if implemented.
+9. Review discovery docs if implemented.
+10. Check no unnecessary dependencies were added.
+11. Check no unused imports/classes/config remain.
+12. Check tests do not contain low-level Selenium code after framework refactor.
+13. Check flows do not contain locators.
+14. Check weak locators are marked with TODO.
+15. Run validation command.
+16. Document remaining TODOs and risks.
+
+Acceptance criteria:
+- Architecture remains clean.
+- Documentation matches actual implementation.
+- Tests run or failures are clearly documented.
+- No new technology is added.
+- Remaining TODOs are documented.
+
+Run/validation command:
+- mvn clean test
+
+Important:
+Do not add features.
+Do not refactor heavily.
+Do not add dependencies.

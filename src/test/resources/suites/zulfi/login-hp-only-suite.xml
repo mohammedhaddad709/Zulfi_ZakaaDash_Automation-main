@@ -1,0 +1,12 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Login Happy Path Only" verbose="1" parallel="false">
+    <test name="LOGIN-HP-001">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.login.LoginHappyPathTest">
+                <methods>
+                    <include name="logHp001_verifySuccessfulLoginReachesHome"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+</suite>

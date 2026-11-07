@@ -1,0 +1,47 @@
+# Phase 18 — Generate TestNG Tests from Approved Workflows
+
+Read and follow AGENTS.md strictly.
+
+Implement Phase 18 only: Generate TestNG Tests from Approved Workflows.
+
+Goal:
+Create TestNG tests from approved high-priority workflows.
+
+Use:
+- Current project stack
+- Existing Page Objects
+- Existing flows
+- Existing assertion/reporting tools if already added
+
+New technology to add:
+- None
+
+Scope:
+- Test classes only
+- testng.xml if needed
+
+Input:
+- docs/discovery/candidate-test-scenarios.md
+- docs/discovery/workflow-catalog.md
+- Existing Page Objects/flows
+
+Tasks:
+1. Select smoke and high-priority scenarios.
+2. Create TestNG tests.
+3. Use flows or Page Objects.
+4. Add assertions.
+5. Add Allure annotations only if Allure already exists.
+6. Use existing test data strategy only.
+
+Acceptance criteria:
+- Tests compile.
+- Tests run through TestNG.
+- Allure results are generated if Allure exists.
+- mvn clean test passes or failures are clearly documented.
+
+Run/validation command:
+- mvn clean test
+
+Important:
+Do not put Selenium code directly in tests.
+Do not use weak locators silently.

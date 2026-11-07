@@ -1,0 +1,40 @@
+# Phase 10 — Allure Reporting
+
+Read and follow AGENTS.md strictly.
+
+Implement Phase 10 only: Allure Reporting.
+
+Goal:
+Generate basic Allure results for TestNG tests.
+
+Use:
+- Current project stack
+- Allure TestNG
+- Allure annotations
+
+New technology to add:
+- Allure TestNG
+
+Scope:
+- pom.xml
+- Login test
+- Optional small AllureLogger only if needed
+
+Tasks:
+1. Add Allure TestNG dependency.
+2. Add simple Allure annotations to the login test.
+3. Run the test.
+4. Confirm allure-results are generated.
+5. Add AllureLogger only if it keeps the code cleaner.
+
+Acceptance criteria:
+- allure-results folder is generated.
+- Test still passes.
+- mvn clean test runs successfully.
+
+Run/validation command:
+- mvn clean test
+
+Important:
+Do not add screenshot listener yet.
+Do not create a large reporting abstraction.

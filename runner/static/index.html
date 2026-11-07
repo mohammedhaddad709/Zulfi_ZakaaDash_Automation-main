@@ -1,0 +1,1829 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Automation Control Center</title>
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("taf-theme");
+      if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+    } catch (e) { /* storage unavailable: follow the OS */ }
+  })();
+</script>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f3f5f9; --bg-grad: radial-gradient(1200px 500px at 85% -10%, #e4ebff 0%, transparent 60%);
+    --panel: #ffffff; --panel-2: #f8fafc; --hover: #f1f4f9; --border: #e2e7ef; --border-strong: #cfd6e2;
+    --text: #172033; --text-2: #3c4759; --muted: #6a778b;
+    --accent: #3157e0; --accent-hover: #2647c2; --accent-soft: #e8eeff; --on-accent: #ffffff;
+    --pass: #12814a; --pass-soft: #e3f5ec; --fail: #c62a35; --fail-soft: #fde8ea; --warn: #b26a00; --warn-soft: #fff3dc;
+    --run: #3157e0; --idle: #6a778b; --triage: #7c3aed; --triage-soft: #f1eaff; --changed: #fff6cc;
+    --code-bg: #0f1522; --code-text: #d5ddea; --shadow: 0 1px 2px rgba(16,24,40,.05), 0 6px 18px rgba(16,24,40,.06);
+    --shadow-lg: 0 20px 50px rgba(16,24,40,.18); --ring: 0 0 0 3px rgba(49,87,224,.22);
+    --s1: #3157e0; --s2: #0d9488; --s3: #c2410c; --s4: #7c3aed;
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0d1117; --bg-grad: radial-gradient(1200px 500px at 85% -10%, #18233f 0%, transparent 60%);
+    --panel: #151b24; --panel-2: #111720; --hover: #1c2430; --border: #252e3b; --border-strong: #344052;
+    --text: #e7ecf3; --text-2: #c2cad6; --muted: #8b97a8;
+    --accent: #7090ff; --accent-hover: #87a2ff; --accent-soft: #1b2645; --on-accent: #0b0f17;
+    --pass: #3fca83; --pass-soft: #12301f; --fail: #ff6b74; --fail-soft: #3a1619; --warn: #f2b14c; --warn-soft: #3a2a0c;
+    --run: #7090ff; --idle: #8b97a8; --triage: #b392ff; --triage-soft: #2a1f45; --changed: #3a3412;
+    --code-bg: #090d13; --code-text: #d5ddea; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.25);
+    --shadow-lg: 0 24px 60px rgba(0,0,0,.55); --ring: 0 0 0 3px rgba(112,144,255,.3);
+    --s1: #7090ff; --s2: #2dd4bf; --s3: #fb923c; --s4: #b392ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #0d1117; --bg-grad: radial-gradient(1200px 500px at 85% -10%, #18233f 0%, transparent 60%);
+      --panel: #151b24; --panel-2: #111720; --hover: #1c2430; --border: #252e3b; --border-strong: #344052;
+      --text: #e7ecf3; --text-2: #c2cad6; --muted: #8b97a8;
+      --accent: #7090ff; --accent-hover: #87a2ff; --accent-soft: #1b2645; --on-accent: #0b0f17;
+      --pass: #3fca83; --pass-soft: #12301f; --fail: #ff6b74; --fail-soft: #3a1619; --warn: #f2b14c; --warn-soft: #3a2a0c;
+      --run: #7090ff; --idle: #8b97a8; --triage: #b392ff; --triage-soft: #2a1f45; --changed: #3a3412;
+      --code-bg: #090d13; --code-text: #d5ddea; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.25);
+      --shadow-lg: 0 24px 60px rgba(0,0,0,.55); --ring: 0 0 0 3px rgba(112,144,255,.3);
+      --s1: #7090ff; --s2: #2dd4bf; --s3: #fb923c; --s4: #b392ff;
+    }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg-grad), var(--bg); background-attachment: fixed; color: var(--text);
+    font: 14px/1.5 "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased; min-height: 100vh;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code, .mono { font-family: ui-monospace, "Cascadia Code", Consolas, Menlo, monospace; font-size: 12.5px; }
+  h2 { font-size: 15px; margin: 0; letter-spacing: -.01em; }
+  h3 { font-size: 13.5px; margin: 0 0 8px; }
+  svg.i { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -3px; }
+  .muted { color: var(--muted); }
+  .small { font-size: 12px; }
+  .nowrap { white-space: nowrap; }
+  .grow { flex: 1 1 auto; min-width: 0; }
+  .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .col { display: flex; flex-direction: column; gap: 8px; }
+  .between { justify-content: space-between; }
+  .right { margin-left: auto; }
+  .ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pre { white-space: pre-wrap; word-break: break-word; }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    padding: 10px 20px; background: color-mix(in srgb, var(--panel) 85%, transparent);
+    backdrop-filter: saturate(160%) blur(12px); border-bottom: 1px solid var(--border);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .logo { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; color: #fff;
+    background: linear-gradient(135deg, #3157e0, #7b4dff); box-shadow: 0 6px 16px rgba(49,87,224,.35); }
+  .logo svg { width: 18px; height: 18px; }
+  .brand h1 { font-size: 15px; margin: 0; line-height: 1.15; }
+  .brand small { color: var(--muted); font-size: 11.5px; display: block; }
+  nav.tabs { display: flex; gap: 2px; flex-wrap: wrap; flex: 1 1 auto; }
+  nav.tabs a { padding: 7px 11px; border-radius: 8px; color: var(--text-2); font-weight: 550; font-size: 13px; display: inline-flex; gap: 6px; align-items: center; }
+  nav.tabs a:hover { background: var(--hover); text-decoration: none; }
+  nav.tabs a.on { background: var(--accent-soft); color: var(--accent); }
+  nav.tabs .count { background: var(--accent); color: var(--on-accent); border-radius: 99px; font-size: 10.5px; padding: 0 6px; line-height: 17px; }
+  .buildpill { display: flex; align-items: center; gap: 8px; padding: 4px 5px 4px 11px; border: 1px solid var(--border);
+    border-radius: 99px; background: var(--panel); font-size: 12px; }
+  .dot { width: 8px; height: 8px; border-radius: 99px; background: var(--idle); flex: none; }
+  .dot.ok { background: var(--pass); } .dot.bad { background: var(--fail); } .dot.busy { background: var(--run); animation: pulse 1.1s infinite; }
+  .dot.warn { background: var(--warn); }
+  @keyframes pulse { 50% { opacity: .35; } }
+
+  /* ---------- layout ---------- */
+  main { padding: 18px 20px 60px; max-width: 1680px; margin: 0 auto; }
+  .page { display: none; }
+  .page.on { display: block; }
+  .grid-runs { display: grid; grid-template-columns: minmax(330px, 410px) minmax(0, 1fr); gap: 16px; align-items: start; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .stack { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  @media (max-width: 1100px) { .grid-runs, .grid-2, .grid-3 { grid-template-columns: minmax(0, 1fr); } }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); min-width: 0; }
+  .card > header { display: flex; align-items: center; gap: 10px; padding: 13px 16px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .card > .body { padding: 14px 16px; }
+  .card > .body.tight { padding: 0; }
+  .section-title { font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 650; margin: 14px 0 6px; }
+  .section-title:first-child { margin-top: 0; }
+  .sticky { position: sticky; top: 70px; }
+  @media (max-width: 1100px) { .sticky { position: static; } }
+
+  /* ---------- controls ---------- */
+  label.field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--text-2); font-weight: 550; min-width: 0; }
+  input[type=text], input[type=password], input[type=number], input[type=time], input[type=search], input[type=email], select, textarea {
+    font: inherit; font-size: 13px; color: var(--text); background: var(--panel-2); border: 1px solid var(--border-strong);
+    border-radius: 8px; padding: 7px 9px; width: 100%; min-width: 0; transition: border-color .12s, box-shadow .12s;
+  }
+  textarea { resize: vertical; min-height: 64px; line-height: 1.45; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: var(--ring); }
+  input.changed, textarea.changed { background: var(--changed); }
+  .inline { display: flex; gap: 6px; align-items: center; }
+  .btn { font: inherit; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; justify-content: center;
+    padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--panel); color: var(--text);
+    cursor: pointer; white-space: nowrap; transition: background .12s, border-color .12s; }
+  .btn:hover { background: var(--hover); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .btn.primary:hover { background: var(--accent-hover); }
+  .btn.danger { color: var(--fail); }
+  .btn.danger.solid { background: var(--fail); border-color: var(--fail); color: #fff; }
+  .btn.ghost { border-color: transparent; background: transparent; }
+  .btn.ghost:hover { background: var(--hover); }
+  .btn.sm { padding: 4px 9px; font-size: 12px; border-radius: 7px; }
+  .btn.xs { padding: 2px 7px; font-size: 11.5px; border-radius: 6px; }
+  .btn.block { width: 100%; }
+  .seg { display: inline-flex; border: 1px solid var(--border-strong); border-radius: 9px; overflow: hidden; background: var(--panel-2); flex-wrap: wrap; }
+  .seg button { font: inherit; font-size: 12.5px; font-weight: 600; border: 0; background: transparent; color: var(--text-2); padding: 6px 11px; cursor: pointer; }
+  .seg button + button { border-left: 1px solid var(--border); }
+  .seg button.on { background: var(--accent); color: var(--on-accent); }
+  .switch { display: flex; align-items: center; gap: 9px; font-size: 13px; cursor: pointer; user-select: none; }
+  .switch input { appearance: none; width: 34px; height: 20px; border-radius: 99px; background: var(--border-strong); position: relative; cursor: pointer; flex: none; transition: background .15s; margin: 0; }
+  .switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 99px; background: #fff; transition: transform .15s; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+  .switch input:checked { background: var(--accent); }
+  .switch input:checked::after { transform: translateX(14px); }
+  .switch small { display: block; color: var(--muted); font-size: 11.5px; }
+  .choice { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 6px; }
+  .choice button { font: inherit; text-align: left; border: 1px solid var(--border-strong); background: var(--panel-2); border-radius: 9px;
+    padding: 7px 9px; cursor: pointer; color: var(--text); display: flex; flex-direction: column; gap: 1px; }
+  .choice button b { font-size: 12.5px; }
+  .choice button span { font-size: 11px; color: var(--muted); }
+  .choice button.on { border-color: var(--accent); box-shadow: var(--ring); background: var(--accent-soft); }
+  .checklist { max-height: 300px; overflow: auto; border: 1px solid var(--border); border-radius: 9px; background: var(--panel-2); }
+  .checklist .grp { padding: 6px 10px; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; background: var(--panel); position: sticky; top: 0; border-bottom: 1px solid var(--border); display: flex; gap: 6px; align-items: center; }
+  .checklist label { display: flex; gap: 8px; align-items: center; padding: 5px 10px; font-size: 12.5px; cursor: pointer; }
+  .checklist label:hover { background: var(--hover); }
+  .checklist label .count { margin-left: auto; color: var(--muted); font-size: 11px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { font-size: 12px; padding: 4px 10px; border-radius: 99px; border: 1px solid var(--border-strong); background: var(--panel-2); cursor: pointer; color: var(--text-2); font-weight: 600; }
+  .chip.on, .chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .preset { display: flex; flex-direction: column; align-items: flex-start; text-align: left; border-radius: 10px; padding: 7px 10px; gap: 0; }
+  .preset small { color: var(--muted); font-weight: 500; font-size: 11px; }
+
+  /* ---------- badges ---------- */
+  .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 650; padding: 2px 8px; border-radius: 99px; white-space: nowrap; background: var(--hover); color: var(--text-2); }
+  .badge.pass, .badge.passed, .badge.green, .badge.covered { background: var(--pass-soft); color: var(--pass); }
+  .badge.fail, .badge.failed, .badge.broken, .badge.red, .badge.Critical { background: var(--fail-soft); color: var(--fail); }
+  .badge.warn, .badge.yellow, .badge.partial, .badge.High, .badge.skipped { background: var(--warn-soft); color: var(--warn); }
+  .badge.run, .badge.running, .badge.building, .badge.queued, .badge.stopping { background: var(--accent-soft); color: var(--accent); }
+  .badge.triage, .badge.Reopened, .badge.soft, .badge.Medium { background: var(--triage-soft); color: var(--triage); }
+  .badge.Low, .badge.none, .badge.out { background: var(--hover); color: var(--muted); }
+  .badge.outline { background: transparent; border: 1px solid var(--border-strong); }
+  .st { display: inline-flex; align-items: center; gap: 6px; font-weight: 650; font-size: 12px; white-space: nowrap; }
+  .st::before { content: ""; width: 8px; height: 8px; border-radius: 99px; background: var(--idle); }
+  .st.passed::before { background: var(--pass); }
+  .st.fwf::before, .st.error::before, .st.fts::before, .st.envdown::before { background: var(--fail); }
+  .st.running::before, .st.building::before, .st.queued::before, .st.stopping::before { background: var(--run); animation: pulse 1.1s infinite; }
+  .st.queued::before { animation: none; }
+
+  /* ---------- tables ---------- */
+  table.t { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.t th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 650; padding: 8px 10px; border-bottom: 1px solid var(--border); background: var(--panel-2); position: sticky; top: 0; z-index: 1; cursor: default; }
+  table.t th.sort { cursor: pointer; }
+  table.t td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.t tr.click { cursor: pointer; }
+  table.t tr.click:hover td { background: var(--hover); }
+  table.t tr.sel td { background: var(--accent-soft); }
+  .scroll { overflow: auto; }
+  .scroll.h360 { max-height: 360px; }
+  .scroll.h520 { max-height: 520px; }
+  .bar { height: 6px; border-radius: 99px; background: var(--hover); overflow: hidden; display: flex; min-width: 60px; }
+  .bar > i { display: block; height: 100%; }
+  .bar .p { background: var(--pass); } .bar .f { background: var(--fail); } .bar .s { background: var(--warn); } .bar .r { background: var(--run); }
+
+  /* ---------- KPIs ---------- */
+  .kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 10px; }
+  .kpi { border: 1px solid var(--border); border-radius: 11px; padding: 9px 12px; background: var(--panel-2); min-width: 0; }
+  .kpi b { display: block; font-size: 20px; letter-spacing: -.02em; line-height: 1.2; }
+  .kpi span { font-size: 11.5px; color: var(--muted); }
+  .kpi.pass b { color: var(--pass); } .kpi.fail b { color: var(--fail); } .kpi.warn b { color: var(--warn); } .kpi.triage b { color: var(--triage); }
+
+  /* ---------- health cards ---------- */
+  .health { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  table.t .mono { word-break: break-all; }
+  .presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+  .presets .preset { width: 100%; white-space: normal; }
+  .btn.primary.preset small { color: inherit; opacity: .85; }
+  .hcard { border-radius: 14px; border: 1px solid var(--border); background: var(--panel); box-shadow: var(--shadow); padding: 14px 16px; position: relative; overflow: hidden; }
+  .hcard::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 5px; background: var(--idle); }
+  .hcard.green::before { background: var(--pass); } .hcard.yellow::before { background: var(--warn); } .hcard.red::before { background: var(--fail); }
+  .hcard .status { font-size: 20px; font-weight: 750; display: flex; gap: 8px; align-items: center; margin: 4px 0 2px; }
+  .hcard .headline { color: var(--text-2); font-size: 13px; margin-bottom: 10px; }
+  .hcard .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .hcard .metrics div { font-size: 11.5px; color: var(--muted); }
+  .hcard .metrics b { display: block; font-size: 16px; color: var(--text); }
+
+  /* ---------- run detail ---------- */
+  .tabbar { display: flex; gap: 2px; border-bottom: 1px solid var(--border); padding: 0 12px; overflow-x: auto; }
+  .tabbar button { font: inherit; font-size: 13px; font-weight: 600; border: 0; background: none; color: var(--muted); padding: 10px 10px; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .tabbar button.on { color: var(--accent); border-bottom-color: var(--accent); }
+  .failure { border: 1px solid var(--border); border-radius: 11px; padding: 11px 12px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; background: var(--panel-2); }
+  .failure + .failure { margin-top: 10px; }
+  .failure .msg { font-size: 12.5px; color: var(--text-2); margin-top: 4px; }
+  .thumb { width: 150px; height: 94px; border-radius: 8px; border: 1px solid var(--border); object-fit: cover; object-position: top; cursor: zoom-in; background: var(--hover); }
+  @media (max-width: 640px) { .failure { grid-template-columns: 1fr; } .thumb { width: 100%; height: 150px; } }
+  .console { background: var(--code-bg); color: var(--code-text); border-radius: 10px; padding: 12px; font: 12px/1.5 ui-monospace, Consolas, monospace; white-space: pre-wrap; word-break: break-all; max-height: 560px; overflow: auto; margin: 0; }
+  .console .e { color: #ff8a92; } .console .w { color: #f2c46d; } .console .p { color: #6ee7a8; }
+  .progress { height: 8px; border-radius: 99px; background: var(--hover); overflow: hidden; display: flex; }
+  .progress i { display: block; height: 100%; }
+  .kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; font-size: 12.5px; }
+  .kv dt { color: var(--muted); }
+  .kv dd { margin: 0; word-break: break-word; }
+  .empty { padding: 26px 16px; text-align: center; color: var(--muted); font-size: 13px; }
+  .notice { border-radius: 10px; padding: 9px 12px; font-size: 12.5px; background: var(--accent-soft); color: var(--text-2); border: 1px solid var(--border); }
+  .notice.warn { background: var(--warn-soft); }
+  .notice.bad { background: var(--fail-soft); }
+  .notice.ok { background: var(--pass-soft); }
+
+  /* ---------- markdown / diff ---------- */
+  .md { font-size: 13.5px; line-height: 1.6; word-break: break-word; }
+  .md h1, .md h2, .md h3, .md h4 { margin: 14px 0 6px; font-size: 14.5px; }
+  .md h1 { font-size: 16px; }
+  .md p { margin: 6px 0; }
+  .md ul, .md ol { margin: 6px 0; padding-inline-start: 22px; }
+  .md code { background: var(--hover); padding: 1px 5px; border-radius: 5px; }
+  .md pre { background: var(--code-bg); color: var(--code-text); padding: 10px; border-radius: 8px; overflow: auto; }
+  .md pre code { background: none; padding: 0; color: inherit; }
+  .md table { border-collapse: collapse; margin: 8px 0; font-size: 12.5px; display: block; overflow-x: auto; }
+  .md th, .md td { border: 1px solid var(--border); padding: 4px 8px; }
+  .md blockquote { margin: 6px 0; padding: 2px 10px; border-inline-start: 3px solid var(--border-strong); color: var(--text-2); }
+  .diff { background: var(--code-bg); color: var(--code-text); border-radius: 10px; font: 12px/1.45 ui-monospace, Consolas, monospace; white-space: pre; overflow: auto; max-height: 560px; padding: 10px 0; margin: 0; }
+  .diff div { padding: 0 12px; }
+  .diff .a { background: rgba(46, 160, 67, .22); } .diff .d { background: rgba(248, 81, 73, .22); } .diff .h { color: #8fb2ff; } .diff .f { color: #f2c46d; font-weight: 700; background: rgba(255,255,255,.04); }
+  .events { max-height: 520px; overflow: auto; display: flex; flex-direction: column; gap: 6px; }
+  .event { border-radius: 9px; padding: 7px 10px; font-size: 12.5px; border: 1px solid var(--border); background: var(--panel-2); }
+  .event.tool { font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: var(--text-2); padding: 4px 10px; }
+  .event.user { background: var(--accent-soft); }
+  .event.error, .event.tool-error { background: var(--fail-soft); }
+  .event.result { border-color: var(--pass); }
+  .event .t { font-size: 10.5px; color: var(--muted); }
+
+  /* ---------- steps (orchestrator) ---------- */
+  .steps { display: flex; flex-direction: column; gap: 10px; }
+  .step { border: 1px solid var(--border); border-radius: 12px; background: var(--panel-2); }
+  .step > .head { display: flex; gap: 10px; align-items: center; padding: 10px 12px; cursor: pointer; flex-wrap: wrap; }
+  .step > .content { padding: 0 12px 12px; border-top: 1px solid var(--border); }
+  .step .num { width: 24px; height: 24px; border-radius: 99px; display: grid; place-items: center; font-size: 12px; font-weight: 700; background: var(--hover); flex: none; }
+  .step.done .num { background: var(--pass); color: #fff; } .step.failed .num { background: var(--fail); color: #fff; }
+  .step.running .num { background: var(--run); color: #fff; animation: pulse 1.1s infinite; } .step.waiting .num { background: var(--warn); color: #fff; }
+  .step.skipped .num { background: var(--border-strong); }
+  .step.waiting { border-color: var(--warn); box-shadow: 0 0 0 3px var(--warn-soft); }
+  .workflow { border: 1px solid var(--border-strong); border-radius: 12px; padding: 12px; cursor: pointer; background: var(--panel-2); text-align: left; font: inherit; color: var(--text); }
+  .workflow.on { border-color: var(--accent); box-shadow: var(--ring); background: var(--accent-soft); }
+  .workflow b { display: block; font-size: 14px; margin-bottom: 2px; }
+  .workflow span { font-size: 11.5px; color: var(--muted); }
+
+  /* ---------- modal / lightbox / toast ---------- */
+  .overlay { position: fixed; inset: 0; background: rgba(8, 12, 20, .55); z-index: 60; display: flex; align-items: flex-start; justify-content: center; padding: 30px 16px; overflow: auto; }
+  .modal { background: var(--panel); border-radius: 16px; box-shadow: var(--shadow-lg); width: min(1040px, 100%); border: 1px solid var(--border); }
+  .modal > header { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--panel); border-radius: 16px 16px 0 0; z-index: 2; flex-wrap: wrap; }
+  .modal > .body { padding: 16px 18px; }
+  .modal > footer { display: flex; gap: 8px; justify-content: flex-end; padding: 12px 18px; border-top: 1px solid var(--border); flex-wrap: wrap; position: sticky; bottom: 0; background: var(--panel); border-radius: 0 0 16px 16px; }
+  .bug { border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: var(--panel-2); }
+  .bug + .bug { margin-top: 12px; }
+  .bug.off { opacity: .5; }
+  .bug .grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 700px) { .bug .grid4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .lightbox { position: fixed; inset: 0; background: rgba(5, 8, 14, .9); z-index: 80; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; padding: 20px; }
+  .lightbox img { max-width: 100%; max-height: calc(100vh - 90px); border-radius: 8px; box-shadow: var(--shadow-lg); background: #fff; }
+  .lightbox .cap { color: #dbe3ef; font-size: 13px; }
+  #toasts { position: fixed; right: 16px; bottom: 16px; z-index: 90; display: flex; flex-direction: column; gap: 8px; max-width: min(420px, calc(100vw - 32px)); }
+  .toast { padding: 10px 14px; border-radius: 10px; background: var(--panel); border: 1px solid var(--border); box-shadow: var(--shadow-lg); font-size: 13px; border-left: 4px solid var(--accent); }
+  .toast.bad { border-left-color: var(--fail); } .toast.ok { border-left-color: var(--pass); }
+
+  /* ---------- charts ---------- */
+  .chart { width: 100%; height: 190px; display: block; }
+  .chart .grid line { stroke: var(--border); }
+  .chart text { fill: var(--muted); font-size: 10px; }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--text-2); }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+  .seq { display: inline-flex; gap: 2px; }
+  .seq i { width: 9px; height: 9px; border-radius: 2px; background: var(--border-strong); display: inline-block; }
+  .seq i.P { background: var(--pass); } .seq i.F { background: var(--fail); } .seq i.R { background: var(--warn); }
+  .module { border: 1px solid var(--border); border-radius: 10px; background: var(--panel-2); }
+  .module + .module { margin-top: 8px; }
+  .module > .head { display: flex; gap: 10px; align-items: center; padding: 8px 12px; cursor: pointer; flex-wrap: wrap; }
+  .module > .list { padding: 0 12px 10px; font-size: 12px; }
+  @media (max-width: 640px) {
+    main { padding: 12px 16px 50px; }
+    .topbar { padding: 8px 16px; position: static; gap: 8px; }
+    .buildpill { flex: 1 1 auto; }
+    .hcard .metrics { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg></div>
+    <div><h1>Automation Control Center</h1><small id="brandSub">Zulfi Portal · ZakaaDash</small></div>
+  </div>
+  <nav class="tabs" id="nav">
+    <a href="#runs" data-page="runs">Runs <span class="count" id="activeCount" hidden></span></a>
+    <a href="#dashboard" data-page="dashboard">Dashboard</a>
+    <a href="#schedules" data-page="schedules">Schedules</a>
+    <a href="#claude" data-page="claude">Claude</a>
+    <a href="#jobs" data-page="jobs">Orchestrator</a>
+    <a href="#systems" data-page="systems">Systems</a>
+  </nav>
+  <div class="buildpill" id="buildPill" title="Code snapshot used by new runs">
+    <span class="dot" id="buildDot"></span><span id="buildText">Build…</span>
+    <button class="btn xs" id="rebuildBtn" title="Compile a fresh snapshot (mvn test-compile)">Rebuild</button>
+    <button class="btn xs" id="updateBtn" hidden title="Download the code from GitHub and rebuild">Update</button>
+  </div>
+  <button class="btn ghost sm" id="notifyBtn" title="Browser notification when a run finishes"></button>
+  <button class="btn ghost sm" id="themeBtn" title="Theme"></button>
+</header>
+
+<main>
+  <!-- ======================================================= RUNS -->
+  <section class="page" id="page-runs">
+    <div class="grid-runs">
+      <div class="card sticky" id="runForm">
+        <header><h2>New run</h2><span class="muted small right" id="formSystemTitle"></span></header>
+        <div class="body" id="runFormBody"><div class="empty">Loading catalogue…</div></div>
+      </div>
+      <div class="stack">
+        <div class="card">
+          <header>
+            <h2>Runs</h2>
+            <div class="seg" id="runsFilter"></div>
+            <span class="muted small" id="runsMeta"></span>
+            <div class="row right">
+              <button class="btn sm" id="deleteReportsBtn" disabled title="Delete the report files of the selected runs (results stay)">Remove reports</button>
+              <button class="btn sm danger" id="deleteRunsBtn" disabled title="Delete the selected runs with their results and reports">Delete</button>
+            </div>
+          </header>
+          <div class="body tight scroll h360" id="runsTable"></div>
+        </div>
+        <div class="card" id="detailCard"><div class="empty">Select a run to see its results.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================= DASHBOARD -->
+  <section class="page" id="page-dashboard">
+    <div class="row" style="margin-bottom:14px">
+      <h2 style="font-size:18px">Release readiness</h2>
+      <div class="seg" id="dashSystem"></div>
+      <div class="seg" id="dashDays"></div>
+      <span class="muted small" id="dashGenerated"></span>
+      <button class="btn sm right" id="dashRefresh">Refresh</button>
+    </div>
+    <div id="dashBody"><div class="empty">Loading…</div></div>
+  </section>
+
+  <!-- ======================================================= SCHEDULES -->
+  <section class="page" id="page-schedules">
+    <div class="row" style="margin-bottom:14px">
+      <h2 style="font-size:18px">Scheduled runs</h2>
+      <span class="muted small" id="emailState"></span>
+      <button class="btn primary sm right" id="newScheduleBtn">New schedule</button>
+    </div>
+    <div id="schedulesBody"><div class="empty">Loading…</div></div>
+  </section>
+
+  <!-- ======================================================= CLAUDE -->
+  <section class="page" id="page-claude">
+    <div class="grid-runs">
+      <div class="stack">
+        <div class="card"><header><h2>Claude Code</h2><span class="right" id="claudeState"></span></header><div class="body" id="claudeStatus"></div></div>
+        <div class="card"><header><h2>New request</h2></header><div class="body" id="claudeForm"></div></div>
+      </div>
+      <div class="stack">
+        <div class="card"><header><h2>Requests</h2><span class="muted small" id="claudeMeta"></span></header><div class="body tight scroll h360" id="claudeList"></div></div>
+        <div class="card" id="claudeDetail"><div class="empty">Select a request.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================= ORCHESTRATOR -->
+  <section class="page" id="page-jobs">
+    <div class="grid-runs">
+      <div class="card"><header><h2>New QA job</h2></header><div class="body" id="jobForm"></div></div>
+      <div class="stack">
+        <div class="card"><header><h2>Jobs</h2><span class="muted small" id="jobsMeta"></span></header><div class="body tight scroll h360" id="jobsList"></div></div>
+        <div class="card" id="jobDetail"><div class="empty">Select a job.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================= SYSTEMS -->
+  <section class="page" id="page-systems">
+    <div class="row" style="margin-bottom:14px">
+      <h2 style="font-size:18px">Systems</h2>
+      <div class="seg" id="sysTabs"></div>
+      <span class="muted small" id="sysStore"></span>
+    </div>
+    <div id="systemsBody"><div class="empty">Loading…</div></div>
+  </section>
+</main>
+
+<div id="modalRoot"></div>
+<div id="toasts"></div>
+<script>
+"use strict";
+/* ============================================================== core helpers */
+const $ = (id) => document.getElementById(id);
+const S = {
+  catalog: null, systems: {}, order: [], system: null, forms: {}, runs: [], runsMeta: null, build: null,
+  runsFilter: "all", selected: new Set(), detailId: null, detail: null, detailTab: "failures",
+  consoleState: { id: null, offset: 0, text: "" }, page: "runs", retest: {}, lastStatuses: {},
+  dash: { system: "", days: 30, data: null, open: {} }, schedules: null, claude: null, claudeId: null, claudeDetail: null,
+  claudeEvents: [], claudeAfter: 0, claudeTab: "log", jobs: null, jobId: null, job: null, jobForm: { type: "sprint" },
+  config: null, sysTab: null, sysDraft: {}, reliability: null,
+};
+const ICONS = {
+  play: '<path d="M6 4l14 8-14 8V4z"/>', stop: '<rect x="6" y="6" width="12" height="12" rx="2"/>',
+  redo: '<path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/>', file: '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/>',
+  bug: '<path d="M8 2l1.9 1.9M16 2l-1.9 1.9M9 7.1a3 3 0 0 1 6 0V8H9z"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6zM12 20v-9M6 13H2M22 13h-4M6.5 8.5 3 7M17.5 8.5 21 7M6 17l-3 2M18 17l3 2"/>',
+  spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/>',
+  trash: '<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>', ext: '<path d="M14 3h7v7M10 14 21 3M21 14v7H3V3h7"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>', auto: '<circle cx="12" cy="12" r="9"/><path d="M12 3v18"/>',
+  bell: '<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
+  belloff: '<path d="M8.7 3.2A6 6 0 0 1 18 8c0 3 .6 5 1.3 6.4M18 17H3s3-2 3-9a6 6 0 0 1 .3-1.9M10.3 21a1.9 1.9 0 0 0 3.4 0M3 3l18 18"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>', x: '<path d="M18 6 6 18M6 6l12 12"/>', clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>', zap: '<path d="M13 2 3 14h9l-1 8 10-12h-9z"/>',
+  key: '<circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 9.2-9.2M16 7l3 3M18 5l2 2"/>', layers: '<path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5M2 12l10 5 10-5"/>',
+  wand: '<path d="m15 4 5 5L9 20H4v-5z"/><path d="M13 6l5 5"/>', mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+};
+function icon(name) { return `<svg class="i" viewBox="0 0 24 24">${ICONS[name] || ""}</svg>`; }
+function esc(v) {
+  return String(v === null || v === undefined ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function attr(v) { return esc(v); }
+async function api(path, options = {}) {
+  const init = { method: options.method || "GET", headers: {} };
+  if (options.body !== undefined) {
+    init.method = options.method || "POST";
+    init.headers["Content-Type"] = "application/json";
+    init.body = JSON.stringify(options.body);
+  }
+  if (init.method !== "GET") init.headers["X-Runner"] = "1";
+  const response = await fetch(path, init);
+  if (options.blob) {
+    if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || response.statusText); }
+    const disposition = response.headers.get("Content-Disposition") || "";
+    const match = disposition.match(/filename="([^"]+)"/);
+    return { blob: await response.blob(), name: match ? match[1] : "download" };
+  }
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || `${response.status} ${response.statusText}`);
+  return data;
+}
+function post(path, body = {}) { return api(path, { method: "POST", body }); }
+function saveBlob({ blob, name }) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+function toast(message, kind = "info", ms = 4200) {
+  const el = document.createElement("div");
+  el.className = "toast " + (kind === "error" ? "bad" : kind === "ok" ? "ok" : "");
+  el.textContent = message;
+  $("toasts").appendChild(el);
+  setTimeout(() => el.remove(), ms);
+}
+async function act(promise, okMessage) {
+  try { const value = await promise; if (okMessage) toast(okMessage, "ok"); return value; }
+  catch (error) { toast(error.message, "error", 7000); return null; }
+}
+function store(key, value) { try { if (value === undefined) return localStorage.getItem(key); localStorage.setItem(key, value); } catch (e) { return null; } return null; }
+const pTime = (v) => (v ? new Date(v) : null);
+function fmtSecs(s) {
+  if (s === null || s === undefined || isNaN(s)) return "—";
+  s = Math.round(s);
+  if (s < 60) return s + "s";
+  if (s < 3600) return Math.floor(s / 60) + "m " + String(s % 60).padStart(2, "0") + "s";
+  return Math.floor(s / 3600) + "h " + String(Math.floor((s % 3600) / 60)).padStart(2, "0") + "m";
+}
+function ago(v) {
+  const d = pTime(v); if (!d) return "—";
+  const s = (Date.now() - d.getTime()) / 1000;
+  if (s < 0) return "in " + fmtSecs(-s);
+  if (s < 60) return "just now"; if (s < 3600) return Math.floor(s / 60) + " min ago";
+  if (s < 86400) return Math.floor(s / 3600) + " h ago"; return Math.floor(s / 86400) + " d ago";
+}
+function fmtDate(v) { const d = pTime(v); return d ? d.toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"; }
+function fmtBytes(n) { if (!n) return "0 B"; const u = ["B", "KB", "MB", "GB", "TB"]; let i = 0; while (n >= 1024 && i < u.length - 1) { n /= 1024; i++; } return n.toFixed(i ? 1 : 0) + " " + u[i]; }
+const STATUS_CLASS = { "passed": "passed", "finished with failures": "fwf", "failed to start": "fts", "environment down": "envdown", "error": "error", "running": "running", "building": "building", "queued": "queued", "stopping": "stopping", "stopped": "stopped", "cancelled": "cancelled", "interrupted": "interrupted" };
+function statusChip(status) { return `<span class="st ${STATUS_CLASS[status] || ""}">${esc(status)}</span>`; }
+const ACTIVE = new Set(["queued", "building", "running", "stopping"]);
+function sysTitle(key) { return (S.systems[key] || {}).title || key; }
+function shortClass(fullName) { const p = (fullName || "").split("."); return p.length > 1 ? p[p.length - 2] + "." + p[p.length - 1] : fullName; }
+function sevBadge(sev) { return sev ? `<span class="badge ${esc(sev)}">${esc(sev)}</span>` : `<span class="badge outline">Unrated</span>`; }
+function kindBadge(kind) { const cls = { environment: "warn", locator: "run", timeout: "run", data: "warn", assertion: "fail", other: "" }[kind] || ""; return kind ? `<span class="badge ${cls}">${esc(kind)}</span>` : ""; }
+
+/* markdown (escaped first, then a small safe subset) */
+function md(text) {
+  const lines = String(text || "").replace(/\r/g, "").split("\n");
+  const out = []; let i = 0;
+  const inline = (s) => esc(s)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>")
+    .replace(/(^|[^*])\*([^*\s][^*]*)\*/g, "$1<i>$2</i>")
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+|#[^)\s]*)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  while (i < lines.length) {
+    const line = lines[i];
+    if (/^```/.test(line.trim())) {
+      const code = []; i++;
+      while (i < lines.length && !/^```/.test(lines[i].trim())) code.push(lines[i++]);
+      i++; out.push(`<pre><code>${esc(code.join("\n"))}</code></pre>`); continue;
+    }
+    if (/^\s*\|/.test(line) && i + 1 < lines.length && /^\s*\|?\s*:?-{2,}/.test(lines[i + 1])) {
+      const cells = (l) => l.trim().replace(/^\||\|$/g, "").split("|").map((c) => c.trim());
+      const head = cells(line); i += 2; const rows = [];
+      while (i < lines.length && /^\s*\|/.test(lines[i])) rows.push(cells(lines[i++]));
+      out.push(`<table><tr>${head.map((h) => `<th>${inline(h)}</th>`).join("")}</tr>${rows.map((r) => `<tr>${r.map((c) => `<td>${inline(c)}</td>`).join("")}</tr>`).join("")}</table>`);
+      continue;
+    }
+    const h = line.match(/^(#{1,4})\s+(.*)/);
+    if (h) { out.push(`<h${h[1].length}>${inline(h[2])}</h${h[1].length}>`); i++; continue; }
+    if (/^\s*[-*]\s+/.test(line) || /^\s*\d+[.)]\s+/.test(line)) {
+      const ordered = /^\s*\d+[.)]\s+/.test(line); const items = [];
+      while (i < lines.length && (ordered ? /^\s*\d+[.)]\s+/ : /^\s*[-*]\s+/).test(lines[i])) items.push(lines[i++].replace(/^\s*([-*]|\d+[.)])\s+/, ""));
+      out.push(`<${ordered ? "ol" : "ul"}>${items.map((x) => `<li>${inline(x)}</li>`).join("")}</${ordered ? "ol" : "ul"}>`); continue;
+    }
+    if (/^>\s?/.test(line)) { const q = []; while (i < lines.length && /^>\s?/.test(lines[i])) q.push(lines[i++].replace(/^>\s?/, "")); out.push(`<blockquote>${inline(q.join(" "))}</blockquote>`); continue; }
+    if (/^\s*---+\s*$/.test(line)) { out.push("<hr>"); i++; continue; }
+    if (!line.trim()) { i++; continue; }
+    const para = [];
+    while (i < lines.length && lines[i].trim() && !/^(#{1,4}\s|```|\s*[-*]\s|\s*\d+[.)]\s|>|\s*\|)/.test(lines[i])) para.push(lines[i++]);
+    if (!para.length) para.push(lines[i++]);
+    out.push(`<p>${inline(para.join(" "))}</p>`);
+  }
+  return `<div class="md" dir="auto">${out.join("")}</div>`;
+}
+function diffHtml(text) {
+  if (!text) return '<div class="empty">No changes.</div>';
+  return `<pre class="diff">${text.split("\n").map((l) => {
+    const cls = l.startsWith("diff --git") ? "f" : l.startsWith("@@") ? "h" : l.startsWith("+") && !l.startsWith("+++") ? "a" : l.startsWith("-") && !l.startsWith("---") ? "d" : "";
+    return `<div class="${cls}">${esc(l) || " "}</div>`;
+  }).join("")}</pre>`;
+}
+
+/* modal + lightbox */
+function openModal(html, onMount) {
+  const root = $("modalRoot");
+  root.innerHTML = `<div class="overlay" id="overlay"><div class="modal" role="dialog" aria-modal="true">${html}</div></div>`;
+  $("overlay").addEventListener("mousedown", (e) => { if (e.target.id === "overlay") closeModal(); });
+  if (onMount) onMount(root.querySelector(".modal"));
+}
+function closeModal() { $("modalRoot").innerHTML = ""; }
+let LIGHT = { list: [], index: 0 };
+function lightbox(list, index) {
+  LIGHT = { list, index };
+  const item = list[index];
+  $("modalRoot").insertAdjacentHTML("beforeend", `<div class="lightbox" id="lightbox"><img src="${attr(item.src)}" alt=""><div class="cap">${esc(item.caption || "")} · ${index + 1}/${list.length} · ← → Esc</div></div>`);
+  $("lightbox").addEventListener("click", () => $("lightbox").remove());
+}
+document.addEventListener("keydown", (e) => {
+  const box = $("lightbox");
+  if (box) {
+    if (e.key === "Escape") box.remove();
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+      box.remove();
+      const n = LIGHT.list.length; lightbox(LIGHT.list, (LIGHT.index + (e.key === "ArrowRight" ? 1 : n - 1)) % n);
+    }
+    return;
+  }
+  if (e.key === "Escape" && $("overlay")) closeModal();
+});
+
+/* theme + notifications */
+function applyTheme(t) {
+  if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); else document.documentElement.removeAttribute("data-theme");
+  store("taf-theme", t);
+  $("themeBtn").innerHTML = icon(t === "dark" ? "moon" : t === "light" ? "sun" : "auto");
+  $("themeBtn").title = "Theme: " + t;
+}
+$("themeBtn").onclick = () => { const cur = store("taf-theme") || "system"; applyTheme({ system: "light", light: "dark", dark: "system" }[cur] || "system"); };
+function renderNotify() {
+  const on = store("taf-notify") === "1" && "Notification" in window && Notification.permission === "granted";
+  $("notifyBtn").innerHTML = icon(on ? "bell" : "belloff");
+  $("notifyBtn").title = on ? "Notifications on" : "Notify me when a run finishes";
+}
+$("notifyBtn").onclick = async () => {
+  if (!("Notification" in window)) return toast("This browser has no notifications", "error");
+  if (store("taf-notify") === "1") { store("taf-notify", "0"); return renderNotify(); }
+  const permission = await Notification.requestPermission();
+  store("taf-notify", permission === "granted" ? "1" : "0"); renderNotify();
+};
+function announce(run) {
+  if (store("taf-notify") !== "1" || !("Notification" in window) || Notification.permission !== "granted") return;
+  const c = run.counts || {};
+  try { new Notification(`${sysTitle(run.system)} · ${run.status}`, { body: `${c.passed || 0} passed · ${(c.failed || 0) + (c.broken || 0)} failed · ${c.skipped || 0} skipped`, tag: run.id }); } catch (e) { /* ignore */ }
+}
+
+/* ============================================================== routing */
+const PAGES = ["runs", "dashboard", "schedules", "claude", "jobs", "systems"];
+function route() {
+  const hash = location.hash.replace(/^#/, "");
+  let page = "runs";
+  if (hash.startsWith("run=")) { page = "runs"; selectRun(decodeURIComponent(hash.slice(4)), false); }
+  else if (hash.startsWith("job=")) { page = "jobs"; S.jobId = decodeURIComponent(hash.slice(4)); }
+  else if (hash.startsWith("claude=")) { page = "claude"; S.claudeId = decodeURIComponent(hash.slice(7)); }
+  else if (hash === "reliability") page = "dashboard";
+  else if (PAGES.includes(hash)) page = hash;
+  S.page = page;
+  document.querySelectorAll(".page").forEach((el) => el.classList.toggle("on", el.id === "page-" + page));
+  document.querySelectorAll("#nav a").forEach((a) => a.classList.toggle("on", a.dataset.page === page));
+  if (page === "dashboard") loadDashboard().then(() => { if (hash === "reliability" && $("reliabilitySection")) $("reliabilitySection").scrollIntoView({ behavior: "smooth" }); });
+  if (page === "schedules") loadSchedules();
+  if (page === "claude") loadClaude();
+  if (page === "jobs") loadJobs();
+  if (page === "systems") loadSystems();
+}
+window.addEventListener("hashchange", route);
+
+/* ============================================================== build pill */
+function renderBuild(b) {
+  if (!b) return;
+  S.build = b;
+  const dot = $("buildDot");
+  dot.className = "dot " + (b.status === "building" ? "busy" : b.status === "failed" ? "bad" : b.stale ? "warn" : b.status === "ready" ? "ok" : "");
+  const text = b.status === "building" ? `Building snapshot ${b.id}…` : b.status === "failed" ? "Build failed" :
+    b.stale ? "Sources changed · next run rebuilds" : b.id ? `Snapshot ${b.id}` : "No snapshot yet";
+  $("buildText").textContent = text;
+  $("buildText").title = b.built ? `Built ${fmtDate(b.built)}${b.seconds ? ` in ${b.seconds}s` : ""}` : "";
+  $("rebuildBtn").disabled = b.status === "building";
+  const up = b.update || {};
+  $("updateBtn").hidden = !up.configured;
+  $("updateBtn").disabled = !up.allowed || up.status === "updating";
+  $("updateBtn").title = up.allowed ? `Update from GitHub ${up.repo}@${up.branch}${up.message ? " · " + up.message : ""}` : up.reason;
+  if (b.status === "failed") $("buildText").innerHTML = `<a href="/api/build/log" target="_blank">Build failed · log</a>`;
+}
+$("rebuildBtn").onclick = async () => { const b = await act(post("/api/build"), "Rebuilding the code snapshot"); if (b) renderBuild(b); };
+$("updateBtn").onclick = async () => {
+  if (!confirm("Download the code from GitHub, replace src/, suites/, tools/, pom.xml and the runner UI, then rebuild?")) return;
+  await act(post("/api/update"), "Update started");
+};
+
+/* ============================================================== run form */
+function form(system) {
+  if (!S.forms[system]) {
+    const sys = S.systems[system];
+    S.forms[system] = {
+      env: sys.defaultEnv, urls: {}, logins: {}, scope: "full", classes: new Set(), modules: new Set(), group: "", threads: 1,
+      execution: S.catalog.defaultExecution || "LocalHeadless", browser: "Chrome", pace: "fast", gridHost: "localhost", gridPort: "4444",
+      preflight: true, retry: true, metrics: true, fullRun: null, extra: "", parallelSystems: 2, classFilter: "", preset: null,
+    };
+    try {
+      const saved = JSON.parse(store("taf-form-" + system) || "null");
+      if (saved) Object.assign(S.forms[system], saved, { classes: new Set(saved.classes || []), modules: new Set(saved.modules || []), logins: {} });
+      if (!sys.envs[S.forms[system].env]) S.forms[system].env = sys.defaultEnv;
+    } catch (e) { /* ignore */ }
+  }
+  return S.forms[system];
+}
+function saveForm() {
+  const f = form(S.system);
+  const keep = { ...f, classes: [...f.classes], modules: [...f.modules], logins: undefined };
+  store("taf-form-" + S.system, JSON.stringify(keep));
+}
+const SCOPES = [
+  ["full", "Full suite", "every suite class"], ["e2e", "E2E + regression", "journeys + bug checks"], ["e2e-only", "E2E only", "cross-page journeys"],
+  ["classes", "Classes", "pick test classes"], ["modules", "Modules", "pick modules"], ["retest", "Retest failures", "open defects"],
+  ["all", "All systems", "one run per system"],
+];
+const MODES = [["LocalHeadless", "Headless"], ["Local", "Visible"], ["Remote", "Grid"]];
+function scopeEstimate(sys, f) {
+  const byName = Object.fromEntries(sys.classes.map((c) => [c.name, c]));
+  const count = (names) => names.reduce((n, name) => n + (byName[name] ? testsOf(byName[name], f.group) : 0), 0);
+  switch (f.scope) {
+    case "full": return f.group ? (sys.groupCounts[f.group] || 0) : sys.testCount;
+    case "e2e-only": return count(sys.e2e);
+    case "e2e": return count([...new Set([...sys.e2e, ...sys.regression])]);
+    case "classes": return count([...f.classes]);
+    case "modules": return count([...new Set(sys.modules.filter((m) => f.modules.has(m.name)).flatMap((m) => m.classes))]);
+    case "retest": return (S.retest[sys.key] || {}).tests || 0;
+    case "all": return S.order.reduce((n, k) => n + S.systems[k].testCount, 0);
+  }
+  return 0;
+}
+function testsOf(cls, group) { return cls.methods.filter((m) => m.enabled && (!group || m.groups.includes(group))).reduce((n, m) => n + (m.invocations || 1), 0); }
+function renderSystemsSeg() {
+  return `<div class="seg" style="width:100%">${S.order.map((k) => `<button data-sys="${attr(k)}" class="${k === S.system ? "on" : ""}" style="flex:1">${esc(sysTitle(k))}</button>`).join("")}</div>`;
+}
+function renderRunForm() {
+  const sys = S.systems[S.system];
+  if (!sys) return;
+  const f = form(S.system);
+  const envUrls = sys.envs[f.env] || {};
+  const pace = sys.secondsPerTest;
+  const est = scopeEstimate(sys, f);
+  const threads = Math.max(1, Math.min(f.threads, sys.maxThreads));
+  const fullRun = f.fullRun === null ? f.scope === "full" : f.fullRun;
+  const modules = [...new Set(sys.classes.map((c) => c.module))];
+  const filter = f.classFilter.toLowerCase();
+  const classList = modules.map((mod) => {
+    const items = sys.classes.filter((c) => c.module === mod && (!filter || (c.name + " " + c.module + " " + c.methods.map((m) => m.id).join(" ")).toLowerCase().includes(filter)));
+    if (!items.length) return "";
+    return `<div class="grp"><input type="checkbox" data-modall="${attr(mod)}" ${items.every((c) => f.classes.has(c.name)) ? "checked" : ""}>${esc(mod)}</div>` +
+      items.map((c) => `<label title="${attr(c.class)}"><input type="checkbox" data-cls="${attr(c.name)}" ${f.classes.has(c.name) ? "checked" : ""}>
+        <span class="ellipsis">${esc(c.name)}</span>${c.e2e ? '<span class="badge run">E2E</span>' : ""}${c.excluded ? '<span class="badge outline" title="Not in the full suite">excluded</span>' : ""}<span class="count">${c.tests}</span></label>`).join("");
+  }).join("");
+  const moduleList = sys.modules.map((m) => `<label><input type="checkbox" data-mod="${attr(m.name)}" ${f.modules.has(m.name) ? "checked" : ""}><span class="ellipsis">${esc(m.name)}</span>
+    <span class="badge ${attr(m.status)}">${esc(m.status)}</span><span class="count">${m.tests}</span></label>`).join("");
+  const retest = S.retest[S.system];
+  $("formSystemTitle").textContent = "";
+  $("runFormBody").innerHTML = `
+    ${renderSystemsSeg()}
+    ${sys.presets && sys.presets.length ? `<div class="section-title">Quick presets</div><div class="presets">${sys.presets.map((p) => `<button class="btn sm preset ${f.preset === p.id ? "primary" : ""}" data-preset="${attr(p.id)}"><span>${icon(p.icon || "zap")} ${esc(p.title)}</span><small>${esc(p.subtitle || "")}</small></button>`).join("")}</div>` : ""}
+    <div class="section-title">Environment</div>
+    <div class="col">
+      <label class="field">Environment<select id="fEnv">${Object.keys(sys.envs).map((e) => `<option value="${attr(e)}" ${e === f.env ? "selected" : ""}>${esc(e)}</option>`).join("")}</select></label>
+      ${sys.urls.map((u) => { const value = f.urls[u.label] !== undefined ? f.urls[u.label] : envUrls[u.label] || ""; const changed = value !== (envUrls[u.label] || "");
+        return `<label class="field">${esc(u.label)} <span class="muted small">→ -D${esc(u.targets.join(", -D"))}</span><input type="text" data-url="${attr(u.label)}" value="${attr(value)}" class="${changed ? "changed" : ""}" placeholder="https://…" spellcheck="false"></label>`; }).join("")}
+    </div>
+    <div class="section-title">Login data <span class="muted" style="text-transform:none;letter-spacing:0;font-weight:500">· this run only, never saved</span></div>
+    <div class="col">${sys.logins.map((l) => `<label class="field">${esc(l.label)} <span class="muted small">${esc(l.env)}${l.inherited ? ` · blank = ${esc(l.source)}` : " · not set on the runner"}</span>
+      <div class="inline"><input type="${l.secret ? "password" : "text"}" data-login="${attr(l.env)}" value="${attr(f.logins[l.env] || "")}" placeholder="${l.inherited ? "inherited" : l.secret ? "required" : esc(l.default || "")}" autocomplete="off" spellcheck="false">
+      ${l.secret ? `<button class="btn sm ghost" data-reveal="${attr(l.env)}" type="button" title="Show/hide">👁</button>` : ""}</div></label>`).join("")}</div>
+    <div class="section-title">Scope</div>
+    <div class="choice">${SCOPES.map(([k, t, d]) => `<button data-scope="${k}" class="${f.scope === k ? "on" : ""}"><b>${t}</b><span>${d}</span></button>`).join("")}</div>
+    ${f.scope === "classes" ? `<div style="margin-top:8px" class="col"><div class="inline"><input type="search" id="fClassFilter" placeholder="Filter classes / test IDs" value="${attr(f.classFilter)}"><button class="btn sm" id="fClassNone">None</button></div><div class="checklist">${classList || '<div class="empty">No match</div>'}</div></div>` : ""}
+    ${f.scope === "modules" ? `<div class="checklist" style="margin-top:8px">${moduleList || '<div class="empty">No modules configured</div>'}</div>` : ""}
+    ${f.scope === "retest" ? `<div class="notice" style="margin-top:8px">${retest ? (retest.tests ? `${retest.defects} open defect(s) in ${retest.classes.length} class(es): ${retest.tests} test(s) incl. dependencies` : "No open defect to retest") : "Loading retest plan…"}</div>` : ""}
+    ${f.scope === "all" ? `<div class="row" style="margin-top:8px"><label class="field" style="flex:1">Systems at the same time<input type="number" min="1" max="${S.catalog.maxParallel}" id="fParSys" value="${f.parallelSystems}"></label><div class="muted small" style="flex:2">Queues one full run per system (${S.order.map(sysTitle).join(", ")}); systems on the same server still wait for each other.</div></div>` : ""}
+    <div class="section-title">Execution</div>
+    <div class="col">
+      ${sys.testTypes.length ? `<label class="field">Test type<select id="fGroup"><option value="">All tests</option>${sys.testTypes.map((t) => `<option value="${attr(t.group)}" ${f.group === t.group ? "selected" : ""}>${esc(t.label)} (${sys.groupCounts[t.group] || 0})</option>`).join("")}</select></label>` : ""}
+      <div class="row">
+        <label class="field" style="flex:1">Parallel classes<select id="fThreads" ${sys.maxThreads <= 1 ? "disabled" : ""}>${[1, 2, 3, 4].filter((n) => n <= sys.maxThreads).map((n) => `<option ${n === threads ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+        <label class="field" style="flex:1">Browser<select id="fBrowser">${["Chrome", "Edge", "Firefox"].map((b) => `<option ${b === f.browser ? "selected" : ""}>${b}</option>`).join("")}</select></label>
+        <label class="field" style="flex:1">Pace<select id="fPace">${["fast", "normal", "demo"].map((p) => `<option ${p === f.pace ? "selected" : ""}>${p}</option>`).join("")}</select></label>
+      </div>
+      ${sys.parallelNote ? `<div class="muted small">${esc(sys.parallelNote)}</div>` : ""}
+      <div class="seg">${MODES.map(([k, t]) => `<button data-mode="${k}" class="${f.execution === k ? "on" : ""}">${t}</button>`).join("")}</div>
+      ${f.execution === "Remote" ? `<div class="row"><label class="field" style="flex:2">Grid host<input type="text" id="fGridHost" value="${attr(f.gridHost)}"></label><label class="field" style="flex:1">Port<input type="text" id="fGridPort" value="${attr(f.gridPort)}"></label></div>` : ""}
+      <label class="switch"><input type="checkbox" id="fPreflight" ${f.preflight ? "checked" : ""}><span>Preflight<small>check the environment answers before running</small></span></label>
+      <label class="switch"><input type="checkbox" id="fRetry" ${f.retry ? "checked" : ""}><span>Retry timing failures once<small>timeouts / stale elements only; never assertions or submit runs</small></span></label>
+      <label class="switch"><input type="checkbox" id="fMetrics" ${f.metrics ? "checked" : ""}><span>Count in success criteria<small>off = trial run, kept out of the dashboard</small></span></label>
+      <label class="switch"><input type="checkbox" id="fFullRun" ${fullRun ? "checked" : ""}><span>Count as full run<small>shown as "Last full run" on the dashboard</small></span></label>
+    </div>
+    <details style="margin-top:10px" ${f.extra ? "open" : ""}><summary class="small" style="cursor:pointer;font-weight:600">Extra JVM properties ${f.extra ? `(${f.extra.split("\n").filter((l) => l.trim() && !l.startsWith("#")).length})` : ""}</summary>
+      ${sys.phaseKeys && sys.phaseKeys.length ? `<div class="row small" style="margin:8px 0">Set all phase gates: ${["", "a", "b", "c"].map((g) => `<button class="btn xs" data-gates="${g}">${g || "none"}</button>`).join("")}</div>` : ""}
+      <textarea id="fExtra" rows="4" class="mono" placeholder="key=value per line (e.g. home.overview.phase=b)">${esc(f.extra)}</textarea>
+      <div class="muted small">Create / submit gates are never set by presets; enabling one here is an explicit authorization and turns retries off.</div>
+    </details>
+    <div class="row" style="margin-top:14px">
+      <div class="grow small"><b>${est}</b> test${est === 1 ? "" : "s"}${pace && est ? ` · ~${fmtSecs(est * pace)}` : ""}<div class="muted">${esc(sysTitle(S.system))} · ${esc(f.env)}</div></div>
+      <button class="btn primary" id="startRun">${icon("play")} Start run</button>
+    </div>`;
+  bindRunForm();
+}
+function bindRunForm() {
+  const body = $("runFormBody");
+  const f = form(S.system);
+  const rerender = () => { saveForm(); renderRunForm(); };
+  body.querySelectorAll("[data-sys]").forEach((b) => b.onclick = () => { S.system = b.dataset.sys; store("taf-system", S.system); renderRunForm(); maybeLoadRetest(); });
+  body.querySelectorAll("[data-scope]").forEach((b) => b.onclick = () => { f.scope = b.dataset.scope; f.fullRun = null; f.preset = null; rerender(); maybeLoadRetest(); });
+  body.querySelectorAll("[data-mode]").forEach((b) => b.onclick = () => { f.execution = b.dataset.mode; rerender(); });
+  body.querySelectorAll("[data-url]").forEach((el) => el.oninput = () => {
+    f.urls[el.dataset.url] = el.value; el.classList.toggle("changed", el.value !== ((S.systems[S.system].envs[f.env] || {})[el.dataset.url] || ""));
+  });
+  body.querySelectorAll("[data-login]").forEach((el) => el.oninput = () => { f.logins[el.dataset.login] = el.value; });
+  body.querySelectorAll("[data-reveal]").forEach((b) => b.onclick = () => { const el = body.querySelector(`[data-login="${b.dataset.reveal}"]`); el.type = el.type === "password" ? "text" : "password"; });
+  body.querySelectorAll("[data-cls]").forEach((el) => el.onchange = () => { el.checked ? f.classes.add(el.dataset.cls) : f.classes.delete(el.dataset.cls); f.preset = null; rerender(); });
+  body.querySelectorAll("[data-modall]").forEach((el) => el.onchange = () => {
+    S.systems[S.system].classes.filter((c) => c.module === el.dataset.modall).forEach((c) => el.checked ? f.classes.add(c.name) : f.classes.delete(c.name)); rerender();
+  });
+  body.querySelectorAll("[data-mod]").forEach((el) => el.onchange = () => { el.checked ? f.modules.add(el.dataset.mod) : f.modules.delete(el.dataset.mod); rerender(); });
+  body.querySelectorAll("[data-preset]").forEach((b) => b.onclick = () => applyPreset(b.dataset.preset));
+  body.querySelectorAll("[data-gates]").forEach((b) => b.onclick = () => { setGates(b.dataset.gates); rerender(); });
+  const on = (id, ev, fn) => { const el = $(id); if (el) el[ev] = fn; };
+  on("fEnv", "onchange", (e) => { f.env = e.target.value; f.urls = {}; rerender(); });
+  on("fClassFilter", "oninput", (e) => { f.classFilter = e.target.value; const pos = e.target.selectionStart; renderRunForm(); const el = $("fClassFilter"); el.focus(); el.setSelectionRange(pos, pos); });
+  on("fClassNone", "onclick", () => { f.classes.clear(); rerender(); });
+  on("fParSys", "onchange", (e) => { f.parallelSystems = Math.max(1, parseInt(e.target.value || "1", 10)); saveForm(); });
+  on("fGroup", "onchange", (e) => { f.group = e.target.value; rerender(); });
+  on("fThreads", "onchange", (e) => { f.threads = parseInt(e.target.value, 10); saveForm(); });
+  on("fBrowser", "onchange", (e) => { f.browser = e.target.value; saveForm(); });
+  on("fPace", "onchange", (e) => { f.pace = e.target.value; saveForm(); });
+  on("fGridHost", "oninput", (e) => { f.gridHost = e.target.value; saveForm(); });
+  on("fGridPort", "oninput", (e) => { f.gridPort = e.target.value; saveForm(); });
+  on("fPreflight", "onchange", (e) => { f.preflight = e.target.checked; saveForm(); });
+  on("fRetry", "onchange", (e) => { f.retry = e.target.checked; saveForm(); });
+  on("fMetrics", "onchange", (e) => { f.metrics = e.target.checked; saveForm(); });
+  on("fFullRun", "onchange", (e) => { f.fullRun = e.target.checked; saveForm(); });
+  on("fExtra", "oninput", (e) => { f.extra = e.target.value; saveForm(); });
+  on("startRun", "onclick", startRun);
+}
+function setGates(letter) {
+  const sys = S.systems[S.system], f = form(S.system);
+  const keys = (sys.phaseKeys || []);
+  const lines = f.extra.split("\n").filter((l) => l.trim() && !keys.some((k) => l.trim().startsWith(k.key + "=")));
+  if (letter) keys.forEach((k) => lines.push(`${k.key}=${k.max && letter > k.max ? k.max : letter}`));
+  f.extra = lines.join("\n");
+}
+function applyPreset(id) {
+  const sys = S.systems[S.system], f = form(S.system);
+  const p = (sys.presets || []).find((x) => x.id === id);
+  if (!p) return;
+  f.preset = id; f.scope = "classes"; f.classes = new Set(p.classes); if (p.pace) f.pace = p.pace; f.fullRun = false;
+  setGates(p.phase || "");
+  saveForm(); renderRunForm();
+  toast(`Preset "${p.title}": ${p.classes.length} classes${p.phase ? `, phase ${p.phase}` : ""}`);
+}
+async function maybeLoadRetest() {
+  const f = form(S.system);
+  if (f.scope !== "retest") return;
+  const plan = await api("/api/retest/" + S.system).catch(() => null);
+  if (plan) { S.retest[S.system] = plan; if (form(S.system).scope === "retest") renderRunForm(); }
+}
+async function startRun() {
+  const f = form(S.system);
+  const payload = {
+    system: S.system, env: f.env, urls: f.urls, logins: Object.fromEntries(Object.entries(f.logins).filter(([, v]) => v)),
+    scope: f.scope, classes: [...f.classes], modules: [...f.modules], group: f.group || null, threads: f.threads,
+    execution: f.execution, browser: f.browser, pace: f.pace, gridHost: f.gridHost, gridPort: f.gridPort,
+    preflight: f.preflight, retry: f.retry, metrics: f.metrics, fullRun: f.fullRun === null ? f.scope === "full" : f.fullRun,
+    extraProperties: f.extra, preset: f.preset || undefined,
+  };
+  $("startRun").disabled = true;
+  try {
+    if (f.scope === "all") {
+      const result = await post("/api/runs/all", { ...payload, parallelSystems: f.parallelSystems, scope: "full", fullRun: true });
+      toast(`Queued ${result.runs.length} run(s)` + (result.errors.length ? ` · ${result.errors.join("; ")}` : ""), "ok");
+      if (result.runs[0]) location.hash = "run=" + result.runs[0].id;
+    } else {
+      const run = await post("/api/runs", payload);
+      toast(`Queued run ${run.id} · ${run.estimated} tests`, "ok");
+      location.hash = "run=" + run.id;
+    }
+    f.logins = {};
+    renderRunForm();
+    refreshRuns();
+  } catch (error) { toast(error.message, "error", 8000); }
+  finally { if ($("startRun")) $("startRun").disabled = false; }
+}
+
+/* ============================================================== runs list */
+function progressBar(r) {
+  const p = r.progress || {}, c = r.counts;
+  const total = Math.max(r.estimated || 0, (c ? c.passed + c.failed + c.broken + c.skipped : p.done || 0), 1);
+  const passed = c ? c.passed : p.passed || 0, failed = c ? c.failed + c.broken : p.failed || 0, skipped = c ? c.skipped : p.skipped || 0;
+  return `<div class="bar" title="${passed} passed · ${failed} failed · ${skipped} skipped of ${total}"><i class="p" style="width:${100 * passed / total}%"></i><i class="f" style="width:${100 * failed / total}%"></i><i class="s" style="width:${100 * skipped / total}%"></i></div>`;
+}
+function scopeLabel(r) {
+  const extra = r.scope === "classes" ? ` · ${(r.classes || []).length}` : r.scope === "modules" ? ` · ${(r.modules || []).length}` : "";
+  return esc(r.scope) + extra + (r.group ? ` · ${esc(r.group)}` : "") + (r.threads > 1 ? ` · ×${r.threads}` : "");
+}
+function renderRuns() {
+  const filters = [["all", "All"], ...S.order.map((k) => [k, sysTitle(k)])];
+  $("runsFilter").innerHTML = filters.map(([k, t]) => `<button data-f="${attr(k)}" class="${S.runsFilter === k ? "on" : ""}">${esc(t)}</button>`).join("");
+  $("runsFilter").querySelectorAll("button").forEach((b) => b.onclick = () => { S.runsFilter = b.dataset.f; renderRuns(); });
+  const runs = S.runs.filter((r) => S.runsFilter === "all" || r.system === S.runsFilter);
+  const meta = S.runsMeta || {};
+  $("runsMeta").textContent = `${meta.active || 0} active · ${meta.queued || 0} queued · max ${meta.maxParallel || "?"} parallel`;
+  if (!runs.length) { $("runsTable").innerHTML = '<div class="empty">No runs yet. Start one from the form.</div>'; return updateSelection(); }
+  $("runsTable").innerHTML = `<table class="t"><thead><tr><th style="width:28px"><input type="checkbox" id="selAll"></th><th>Status</th><th>System</th><th>Scope</th><th style="min-width:110px">Result</th><th>Started</th><th>Duration</th></tr></thead><tbody>
+    ${runs.map((r) => {
+      const c = r.counts; const t = r.timing || {};
+      const result = c ? `<div class="small">${c.passed}✓ ${c.failed + c.broken ? `<b style="color:var(--fail)">${c.failed + c.broken}✗</b>` : "0✗"} ${c.skipped ? c.skipped + "⤼" : ""}${c.bugChecks ? ` <span class="badge soft" title="bug checks">${c.bugChecks} bug</span>` : ""}${c.flaky ? ` <span class="badge warn">${c.flaky} flaky</span>` : ""}</div>` :
+        r.status === "running" ? `<div class="small muted">${(r.progress || {}).done || 0}/${r.estimated}</div>` : "";
+      const duration = r.status === "running" ? `${fmtSecs(t.elapsed)}${t.remaining ? `<div class="muted small">~${fmtSecs(t.remaining)} left</div>` : ""}` :
+        r.status === "queued" ? (r.notBefore ? `<span class="small">retry ${ago(r.notBefore)}</span>` : `<span class="muted small">${t.expected ? "~" + fmtSecs(t.expected) : ""}</span>`) : fmtSecs(t.elapsed);
+      return `<tr class="click ${r.id === S.detailId ? "sel" : ""}" data-run="${attr(r.id)}">
+        <td><input type="checkbox" data-pick="${attr(r.id)}" ${S.selected.has(r.id) ? "checked" : ""} ${ACTIVE.has(r.status) ? "disabled" : ""}></td>
+        <td>${statusChip(r.status)}${r.schedule ? `<div class="muted small">⏰ ${esc(r.schedule.name)}</div>` : ""}${r.metrics === false ? '<div class="muted small">trial</div>' : ""}${r.completeFullRun ? '<div class="small" style="color:var(--pass)">full run</div>' : ""}</td>
+        <td class="nowrap">${esc(sysTitle(r.system))}<div class="muted small">${esc(r.env)}</div></td>
+        <td class="small">${scopeLabel(r)}${r.envRetry ? `<div class="muted">env retry ${r.envRetry}</div>` : ""}</td>
+        <td>${progressBar(r)}${result}</td>
+        <td class="nowrap small">${fmtDate(r.started || r.created)}</td>
+        <td class="nowrap small">${duration}</td></tr>`;
+    }).join("")}</tbody></table>`;
+  $("runsTable").querySelectorAll("tr[data-run]").forEach((tr) => tr.onclick = (e) => { if (e.target.closest("input")) return; location.hash = "run=" + tr.dataset.run; });
+  $("runsTable").querySelectorAll("[data-pick]").forEach((el) => el.onchange = () => { el.checked ? S.selected.add(el.dataset.pick) : S.selected.delete(el.dataset.pick); updateSelection(); });
+  $("selAll").onchange = (e) => { runs.filter((r) => !ACTIVE.has(r.status)).forEach((r) => e.target.checked ? S.selected.add(r.id) : S.selected.delete(r.id)); renderRuns(); };
+  updateSelection();
+}
+function updateSelection() {
+  const n = S.selected.size;
+  $("deleteRunsBtn").disabled = !n; $("deleteReportsBtn").disabled = !n;
+  $("deleteRunsBtn").textContent = n ? `Delete ${n}` : "Delete";
+}
+$("deleteRunsBtn").onclick = () => deleteSelected("runs");
+$("deleteReportsBtn").onclick = () => deleteSelected("reports");
+async function deleteSelected(mode) {
+  const ids = [...S.selected];
+  const text = mode === "runs" ? `Delete ${ids.length} run(s) with their results and reports? This cannot be undone.` :
+    `Remove the report files (Allure, screenshots, console) of ${ids.length} run(s)? Their results stay.`;
+  if (!confirm(text)) return;
+  const result = await act(post("/api/runs/delete", { ids, mode }));
+  if (result) { toast(`${mode === "runs" ? "Deleted" : "Reports removed for"} ${result.deleted.length} run(s)`, "ok"); S.selected.clear(); if (mode === "runs" && ids.includes(S.detailId)) { S.detailId = null; S.detail = null; renderDetail(); } refreshRuns(); }
+}
+async function refreshRuns() {
+  const data = await api("/api/runs").catch(() => null);
+  if (!data) return;
+  for (const r of data.runs) {
+    const before = S.lastStatuses[r.id];
+    if (before && ACTIVE.has(before) && !ACTIVE.has(r.status)) announce(r);
+    S.lastStatuses[r.id] = r.status;
+  }
+  S.runs = data.runs; S.runsMeta = data;
+  renderBuild(data.build);
+  const active = data.active + data.queued;
+  $("activeCount").hidden = !active; $("activeCount").textContent = active;
+  if (S.page === "runs") renderRuns();
+}
+
+/* ============================================================== run detail */
+async function selectRun(id, push = true) {
+  if (push) { location.hash = "run=" + id; return; }
+  if (S.detailId !== id) { S.detailId = id; S.detail = null; S.detailTab = "failures"; S.consoleState = { id, offset: 0, text: "" }; }
+  await refreshDetail();
+  if (S.page === "runs") renderRuns();
+}
+async function refreshDetail() {
+  if (!S.detailId) return;
+  const run = await api("/api/runs/" + encodeURIComponent(S.detailId)).catch((e) => { if (S.detail === null) $("detailCard").innerHTML = `<div class="empty">${esc(e.message)}</div>`; return null; });
+  if (!run || run.id !== S.detailId) return;
+  const statusChanged = !S.detail || S.detail.status !== run.status || (S.detail.summary || {}).total !== (run.summary || {}).total;
+  S.detail = run;
+  if (statusChanged || !$("detailHead")) renderDetail(); else updateLive();
+}
+function kpis(run) {
+  const c = (run.summary || {}).counts || {}; const t = run.timing || {};
+  const items = [["pass", c.passed ?? (run.progress || {}).passed ?? 0, "passed"], ["fail", (c.failed ?? (run.progress || {}).failed ?? 0) + (c.broken || 0), "failed"],
+    ["warn", c.skipped ?? (run.progress || {}).skipped ?? 0, "skipped"], ["triage", c.bugChecks || 0, "bug checks"], ["warn", c.flaky || 0, "flaky (passed on retry)"],
+    ["", run.estimated || 0, "expected tests"], ["", fmtSecs(t.elapsed), run.status === "running" && t.remaining ? `elapsed · ~${fmtSecs(t.remaining)} left` : "duration"]];
+  if (c.setupFailures) items.splice(5, 0, ["fail", c.setupFailures, "setup failures"]);
+  return `<div class="kpis">${items.map(([cls, v, l]) => `<div class="kpi ${cls}"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join("")}</div>`;
+}
+function liveBar(run) {
+  if (!ACTIVE.has(run.status)) return "";
+  const p = run.progress || {}; const total = Math.max(run.estimated || 1, p.done || 0, 1);
+  return `<div style="margin-top:10px"><div class="progress"><i style="width:${100 * (p.passed || 0) / total}%;background:var(--pass)"></i><i style="width:${100 * (p.failed || 0) / total}%;background:var(--fail)"></i><i style="width:${100 * (p.skipped || 0) / total}%;background:var(--warn)"></i></div>
+    <div class="small muted" style="margin-top:4px">${esc(run.message || "")}${p.current ? ` · now <code>${esc(p.current)}</code>` : ""} · ${p.done || 0}/${run.estimated}${p.retried ? ` · ${p.retried} retried` : ""}</div></div>`;
+}
+function renderDetail() {
+  const run = S.detail;
+  if (!run) { $("detailCard").innerHTML = '<div class="empty">Select a run to see its results.</div>'; return; }
+  const tests = (run.summary || {}).tests || [];
+  const failures = tests.filter((t) => t.status === "failed" || t.status === "broken");
+  const active = ACTIVE.has(run.status);
+  const tabs = [["failures", `Failures (${failures.length})`], ["tests", `Tests (${tests.length})`], ["console", "Console"], ["preflight", "Preflight"], ["details", "Details"]];
+  $("detailCard").innerHTML = `
+    <header id="detailHead">
+      <div class="grow"><div class="row"><h2>${esc(sysTitle(run.system))} · ${esc(run.envName || run.env)}</h2>${statusChip(run.status)}
+        ${run.schedule ? `<span class="badge outline">⏰ ${esc(run.schedule.name)}</span>` : ""}${run.batch ? `<span class="badge outline" title="all-systems batch">batch</span>` : ""}</div>
+        <div class="muted small">${esc(run.id)} · ${scopeLabel(run)} · ${esc(run.execution)} · created ${fmtDate(run.created)}${run.snapshot ? ` · snapshot ${esc(run.snapshot)}` : ""}</div></div>
+      <div class="row">
+        ${active ? `<button class="btn sm danger" data-a="stop">${icon("stop")} Stop</button>` : `<button class="btn sm" data-a="rerun">${icon("redo")} Rerun</button>`}
+        ${!active && failures.length ? `<button class="btn sm" data-a="rerun-failed">${icon("redo")} Rerun failed</button>` : ""}
+        ${run.report ? `<a class="btn sm" href="${attr(run.report)}" target="_blank">${icon("ext")} Allure</a>` : ""}
+        ${run.consoleAvailable ? `<a class="btn sm" href="/runs/${attr(run.id)}/console.log" target="_blank">${icon("file")} Log</a>` : ""}
+        ${failures.length ? `<button class="btn sm" data-a="bugs">${icon("bug")} Bug report</button>` : ""}
+        ${failures.length && !active ? `<button class="btn sm" data-a="claude">${icon("spark")} Ask Claude</button>` : ""}
+        ${run.healable && !active ? `<button class="btn sm" data-a="heal" title="Locator / wait failures only">${icon("wand")} Heal ${run.healable}</button>` : ""}
+      </div>
+    </header>
+    <div class="body">
+      ${run.error && run.status !== "passed" ? `<div class="notice ${run.status === "environment down" ? "warn" : "bad"}" style="margin-bottom:10px">${esc(run.error)}</div>` : ""}
+      ${run.notified ? `<div class="notice" style="margin-bottom:10px">✉ ${esc(run.notified.email)}</div>` : ""}
+      ${kpis(run)}<div id="liveBox">${liveBar(run)}</div>
+      ${!active ? `<div class="row" style="margin-top:10px">
+        <label class="switch"><input type="checkbox" data-toggle="fullrun" ${run.fullRun ? "checked" : ""}><span>Count as full run</span></label>
+        <label class="switch"><input type="checkbox" data-toggle="metrics" ${run.metrics !== false ? "checked" : ""}><span>Count in success criteria</span></label>
+        ${run.reportsInSpaces ? '<span class="badge outline">reports in Spaces</span>' : ""}${run.reportsDeleted ? '<span class="badge outline">reports removed</span>' : ""}
+      </div>` : ""}
+    </div>
+    <div class="tabbar">${tabs.map(([k, t]) => `<button data-tab="${k}" class="${S.detailTab === k ? "on" : ""}">${t}</button>`).join("")}</div>
+    <div class="body" id="detailPane"></div>`;
+  const card = $("detailCard");
+  card.querySelectorAll("[data-tab]").forEach((b) => b.onclick = () => { S.detailTab = b.dataset.tab; renderDetail(); });
+  card.querySelectorAll("[data-a]").forEach((b) => b.onclick = () => runAction(b.dataset.a));
+  card.querySelectorAll("[data-toggle]").forEach((el) => el.onchange = async () => { await act(post(`/api/runs/${run.id}/${el.dataset.toggle}`, { count: el.checked }), "Saved"); refreshDetail(); });
+  renderPane();
+}
+function updateLive() {
+  const run = S.detail;
+  if ($("liveBox")) $("liveBox").innerHTML = liveBar(run);
+  const k = $("detailCard").querySelector(".kpis");
+  if (k) k.outerHTML = kpis(run);
+  if (S.detailTab === "console") pollConsole();
+}
+function renderPane() {
+  const run = S.detail, pane = $("detailPane");
+  if (!pane) return;
+  const tests = (run.summary || {}).tests || [];
+  if (S.detailTab === "failures") {
+    const failures = tests.filter((t) => t.status === "failed" || t.status === "broken");
+    const setup = (run.summary || {}).setup || [];
+    const setupHtml = setup.length ? `<div class="notice bad" style="margin-bottom:10px"><b>Setup / teardown failed</b> — tests that depend on it were skipped:${setup.map((s) => `<div class="small mono" style="margin-top:4px">${esc(shortClass(s.fullName))}${s.times > 1 ? ` ×${s.times}` : ""}: ${esc(s.exception ? s.exception + " — " : "")}${esc(s.message)}</div>`).join("")}</div>` : "";
+    if (!failures.length) { pane.innerHTML = setupHtml + `<div class="empty">${ACTIVE.has(run.status) ? "Results appear when the run finishes." : run.summary ? (setup.length ? "No test failed, but setup failures skipped tests." : "No failed test 🎉") : "No results."}</div>`; return; }
+    const shots = failures.filter((t) => t.shot).map((t) => ({ src: `/runs/${run.id}/shot/${t.shot}`, caption: t.testId || t.name }));
+    pane.innerHTML = setupHtml + failures.map((t) => {
+      const d = t.defect || {};
+      const shotIndex = shots.findIndex((s) => s.src.endsWith("/" + t.shot));
+      return `<div class="failure">
+        <div style="min-width:0"><div class="row"><b dir="auto">${esc(t.testId ? t.testId + " — " : "")}${esc(t.title || t.name)}</b>${kindBadge(t.kind)}${t.soft ? '<span class="badge soft">bug check</span>' : ""}${t.quarantined ? '<span class="badge outline">quarantined</span>' : ""}${d.id ? `<span class="badge outline">${esc(d.id)}</span>` : ""}</div>
+          <div class="muted small mono ellipsis" title="${attr(t.fullName)}">${esc(shortClass(t.fullName))} · ${fmtSecs(t.duration)}${t.retried ? ` · retried ${t.retried}×` : ""}</div>
+          <div class="msg pre" dir="auto">${esc(t.message || "(no message)")}</div>
+          ${t.firstAttempt ? `<div class="small muted pre">First attempt: ${esc(t.firstAttempt)}</div>` : ""}
+          <div class="row" style="margin-top:8px">
+            <select data-sev="${attr(t.fullName)}" style="width:auto">${["", "Critical", "High", "Medium", "Low"].map((s) => `<option value="${s}" ${(d.severity || "") === s ? "selected" : ""}>${s || "Severity…"}</option>`).join("")}</select>
+            <input type="text" data-note="${attr(t.fullName)}" placeholder="Sentence for stakeholders" value="${attr(d.note || "")}" dir="auto" style="flex:1;min-width:160px">
+            <button class="btn sm" data-rate="${attr(t.fullName)}">Save</button>
+            <button class="btn sm" data-retest="${attr(t.fullName)}" title="Run only this test (and its dependencies)">${icon("redo")} Retest</button>
+            <button class="btn sm ghost" data-quar="${attr(t.fullName)}" data-on="${t.quarantined ? "0" : "1"}">${t.quarantined ? "Release" : "Quarantine"}</button>
+            <label class="switch small"><input type="checkbox" data-notbug="${attr(t.fullName)}" ${d.notBug ? "checked" : ""}><span>Not a bug</span></label>
+          </div></div>
+        ${t.shot ? `<img class="thumb" loading="lazy" src="/runs/${attr(run.id)}/shot/${attr(t.shot)}" data-shot="${shotIndex}" alt="screenshot">` : ""}</div>`;
+    }).join("");
+    pane.querySelectorAll("[data-shot]").forEach((img) => img.onclick = () => lightbox(shots, parseInt(img.dataset.shot, 10)));
+    pane.querySelectorAll("[data-rate]").forEach((b) => b.onclick = async () => {
+      const test = b.dataset.rate;
+      const sev = pane.querySelector(`[data-sev="${CSS.escape(test)}"]`).value, note = pane.querySelector(`[data-note="${CSS.escape(test)}"]`).value;
+      const entry = await act(post("/api/bugs/rate", { run: run.id, test, severity: sev || null, note }));
+      if (entry) { toast(`Saved ${entry.id}`, "ok"); refreshDetail(); }
+    });
+    pane.querySelectorAll("[data-notbug]").forEach((el) => el.onchange = async () => { await act(post("/api/bugs/rate", { run: run.id, test: el.dataset.notbug, notBug: el.checked }), el.checked ? "Marked as not a bug" : "Counted as a defect again"); refreshDetail(); });
+    pane.querySelectorAll("[data-retest]").forEach((b) => b.onclick = async () => { const r = await act(post("/api/defects/retest", { run: run.id, test: b.dataset.retest })); if (r) { toast(`Retest queued: ${r.id}`, "ok"); location.hash = "run=" + r.id; } });
+    pane.querySelectorAll("[data-quar]").forEach((b) => b.onclick = async () => {
+      const on = b.dataset.on === "1"; const reason = on ? prompt("Why quarantine this test? (it still runs, but is left out of open defects and release status)", "flaky") : "";
+      if (on && reason === null) return;
+      await act(post("/api/reliability/quarantine", { system: run.system, test: b.dataset.quar, on, reason }), on ? "Quarantined" : "Released"); refreshDetail();
+    });
+  } else if (S.detailTab === "tests") {
+    const filter = S.testFilter || "all";
+    const rows = tests.filter((t) => filter === "all" || t.status === filter || (filter === "flaky" && t.flaky));
+    pane.innerHTML = `<div class="row" style="margin-bottom:8px"><div class="seg">${["all", "passed", "failed", "broken", "skipped", "flaky"].map((k) => `<button data-tf="${k}" class="${filter === k ? "on" : ""}">${k}</button>`).join("")}</div>
+      <button class="btn sm right" id="csvBtn">CSV</button></div>
+      ${rows.length ? `<div class="scroll h520"><table class="t"><thead><tr><th>Status</th><th>Test</th><th>Duration</th><th>Message</th></tr></thead><tbody>${rows.map((t) => `<tr>
+        <td><span class="badge ${attr(t.status)}">${esc(t.status)}</span>${t.flaky ? ' <span class="badge warn">flaky</span>' : ""}${t.soft ? ' <span class="badge soft">bug check</span>' : ""}</td>
+        <td><div dir="auto">${esc(t.testId ? t.testId + " — " : "")}${esc(t.title || t.name)}</div><div class="muted small mono">${esc(shortClass(t.fullName))}</div></td>
+        <td class="nowrap">${fmtSecs(t.duration)}</td><td class="small pre" dir="auto">${esc((t.message || "").slice(0, 300))}</td></tr>`).join("")}</tbody></table></div>` : '<div class="empty">No test in this filter.</div>'}`;
+    pane.querySelectorAll("[data-tf]").forEach((b) => b.onclick = () => { S.testFilter = b.dataset.tf; renderPane(); });
+    $("csvBtn").onclick = () => {
+      const lines = [["status", "testId", "title", "fullName", "duration", "flaky", "message"].join(",")].concat(tests.map((t) => [t.status, t.testId, t.title, t.fullName, t.duration, t.flaky, (t.message || "").replace(/\s+/g, " ")].map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`).join(",")));
+      saveBlob({ blob: new Blob(["﻿" + lines.join("\n")], { type: "text/csv" }), name: `run-${run.id}.csv` });
+    };
+  } else if (S.detailTab === "console") {
+    pane.innerHTML = `<div class="row" style="margin-bottom:8px"><input type="search" id="consoleFilter" placeholder="Filter lines" value="${attr(S.consoleFilter || "")}" style="max-width:280px"><span class="muted small">${ACTIVE.has(run.status) ? "live" : ""}</span></div><pre class="console" id="consoleBox"></pre>`;
+    $("consoleFilter").oninput = (e) => { S.consoleFilter = e.target.value; paintConsole(); };
+    if (S.consoleState.id !== run.id) S.consoleState = { id: run.id, offset: 0, text: "" };
+    paintConsole(); pollConsole();
+  } else if (S.detailTab === "preflight") {
+    const p = run.preflightResult;
+    pane.innerHTML = !run.preflight ? '<div class="empty">Preflight was switched off for this run.</div>' : !p ? '<div class="empty">Not checked yet.</div>' :
+      `<div class="col">${(p.lines || []).map((l) => `<div class="notice ${l.startsWith("DOWN") ? "bad" : l.startsWith("OK") ? "ok" : ""}">${esc(l)}</div>`).join("")}</div>
+       <table class="t" style="margin-top:10px"><thead><tr><th>Check</th><th>Result</th><th>Detail</th></tr></thead><tbody>${(p.checks || []).map((c) => `<tr><td>${esc(c.label)}<div class="muted small mono">${esc(c.url || "")}</div></td>
+        <td>${c.ok === true ? '<span class="badge pass">OK</span>' : c.ok === false ? '<span class="badge fail">DOWN</span>' : '<span class="badge outline">not verified</span>'}</td><td class="small">${esc(c.status ? "HTTP " + c.status : "")} ${esc(c.detail || "")} ${c.ms ? esc(c.ms + " ms") : ""}</td></tr>`).join("")}</tbody></table>`;
+  } else {
+    pane.innerHTML = `<dl class="kv">
+      <dt>Run</dt><dd class="mono">${esc(run.id)}</dd><dt>Scope</dt><dd>${scopeLabel(run)}</dd>
+      ${run.classes && run.classes.length ? `<dt>Classes</dt><dd>${esc(run.classes.join(", "))}</dd>` : ""}
+      ${run.modules && run.modules.length ? `<dt>Modules</dt><dd>${esc(run.modules.join(", "))}</dd>` : ""}
+      ${run.tests && Object.keys(run.tests).length ? `<dt>Tests</dt><dd>${esc(Object.entries(run.tests).map(([c, m]) => c + ": " + m.join(", ")).join(" · "))}</dd>` : ""}
+      <dt>URLs</dt><dd>${Object.entries(run.urls || {}).map(([k, v]) => `${esc(k)}: <span class="mono">${esc(v)}</span>`).join("<br>")}</dd>
+      <dt>Logins typed</dt><dd>${run.credentialOverrides && run.credentialOverrides.length ? esc(run.credentialOverrides.join(", ")) + " (env only, not saved)" : "none (inherited)"}</dd>
+      <dt>Browser</dt><dd>${esc(run.execution)} · ${esc(run.browser || "Chrome")} · pace ${esc(run.pace || "")}${run.grid ? ` · grid ${esc(run.grid.host)}:${esc(run.grid.port)}` : ""}</dd>
+      <dt>Switches</dt><dd>preflight ${run.preflight ? "on" : "off"} · retry ${run.retry ? "on" : "off"} · metrics ${run.metrics !== false ? "on" : "off"} · full run ${run.fullRun ? "yes" : "no"}</dd>
+      ${run.extraProperties && Object.keys(run.extraProperties).length ? `<dt>Extra properties</dt><dd class="mono">${esc(Object.entries(run.extraProperties).map(([k, v]) => k + "=" + v).join("  "))}</dd>` : ""}
+      <dt>Timing</dt><dd>created ${fmtDate(run.created)} · started ${fmtDate(run.started)} · finished ${fmtDate(run.finished)} · exit ${esc(run.exitCode ?? "—")}</dd>
+      <dt>Snapshot</dt><dd class="mono">${esc(run.snapshot || "—")}</dd>
+      ${run.origin ? `<dt>Origin</dt><dd>${esc(run.origin.type)}${run.origin.id ? ` · <a href="#run=${attr(run.origin.id)}">${esc(run.origin.id)}</a>` : ""}</dd>` : ""}
+      ${run.quarantineChanges ? `<dt>Quarantine</dt><dd>${esc(run.quarantineChanges.map((c) => (c.on ? "quarantined " : "released ") + shortClass(c.test)).join(" · "))}</dd>` : ""}
+      <dt>Command</dt><dd class="mono small pre">${esc(run.commandLine || "—")}</dd></dl>
+      <div class="row" style="margin-top:12px"><a class="btn sm" href="/runs/${attr(run.id)}/suite.xml" target="_blank">suite.xml</a>
+      ${!ACTIVE.has(run.status) ? `<button class="btn sm danger right" id="deleteOne">${icon("trash")} Delete run</button>` : ""}</div>`;
+    if ($("deleteOne")) $("deleteOne").onclick = async () => { if (!confirm("Delete this run with its results and reports?")) return; await act(post("/api/runs/delete", { ids: [run.id], mode: "runs" }), "Deleted"); S.detailId = null; S.detail = null; renderDetail(); location.hash = "runs"; refreshRuns(); };
+  }
+}
+function paintConsole() {
+  const box = $("consoleBox"); if (!box) return;
+  const filter = (S.consoleFilter || "").toLowerCase();
+  const lines = S.consoleState.text.split("\n").filter((l) => !filter || l.toLowerCase().includes(filter)).slice(-4000);
+  const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+  box.innerHTML = lines.map((l) => { const cls = /\b(ERROR|FAIL|Exception|SEVERE)\b/.test(l) ? "e" : /\bWARN/.test(l) ? "w" : /\bPASS\b/.test(l) ? "p" : ""; return cls ? `<span class="${cls}">${esc(l)}</span>` : esc(l); }).join("\n") || '<span class="w">No console output yet.</span>';
+  if (atBottom) box.scrollTop = box.scrollHeight;
+}
+let consoleBusy = false;
+async function pollConsole() {
+  if (consoleBusy || S.detailTab !== "console" || !S.detail) return;
+  consoleBusy = true;
+  try {
+    const st = S.consoleState;
+    const data = await api(`/api/runs/${encodeURIComponent(st.id)}/console?offset=${st.offset}`);
+    if (data.text) { st.text += data.text; st.offset = data.offset; if (st.text.length > 2_000_000) st.text = st.text.slice(-1_500_000); paintConsole(); }
+  } catch (e) { /* keep polling */ } finally { consoleBusy = false; }
+}
+async function runAction(action) {
+  const run = S.detail;
+  if (action === "stop") { if (confirm("Stop this run?")) { await act(post(`/api/runs/${run.id}/stop`), "Stopping"); refreshDetail(); refreshRuns(); } return; }
+  if (action === "rerun" || action === "rerun-failed") { const r = await act(post(`/api/runs/${run.id}/${action}`)); if (r) { toast(`Queued ${r.id}`, "ok"); location.hash = "run=" + r.id; refreshRuns(); } return; }
+  if (action === "bugs") return openBugReport(run);
+  if (action === "claude" || action === "heal") {
+    const auto = confirm(`${action === "heal" ? "Heal locator/wait failures" : "Send the failures to Claude"}.\n\nOK = also rerun the failed tests automatically after you merge Claude's changes.\nCancel = only create the request.`);
+    const req = await act(post(`/api/runs/${run.id}/${action === "heal" ? "heal" : "ask-claude"}`, { autoRun: auto }));
+    if (req) { toast("Claude request started", "ok"); location.hash = "claude=" + req.id; }
+  }
+}
+
+/* ============================================================== bug report modal */
+async function openBugReport(run) {
+  const data = await act(api(`/api/runs/${run.id}/bugs`));
+  if (!data) return;
+  const bugs = data.bugs;
+  const render = () => `<header><h2>Bug report · ${esc(sysTitle(run.system))} · ${esc(run.id)}</h2><span class="muted small">${bugs.filter((b) => b.include).length}/${bugs.length} included</span>
+      <button class="btn sm ghost right" data-close>${icon("x")}</button></header>
+    <div class="body">${bugs.map((b, i) => `<div class="bug ${b.include ? "" : "off"}" data-i="${i}">
+      <div class="row"><label class="switch"><input type="checkbox" data-f="include" ${b.include ? "checked" : ""}><span></span></label>
+        <input type="text" data-f="title" value="${attr(b.title)}" dir="auto" style="flex:1;font-weight:600">${b.id ? `<span class="badge outline">${esc(b.id)}</span>` : '<span class="badge outline" title="assigned on export">new ID</span>'}${b.softCheck ? '<span class="badge soft">bug check</span>' : ""}</div>
+      <div class="grid4" style="margin-top:8px">
+        <label class="field">Severity<select data-f="severity">${["Critical", "High", "Medium", "Low"].map((s) => `<option ${b.severity === s ? "selected" : ""}>${s}</option>`).join("")}</select></label>
+        <label class="field">Priority<select data-f="priority">${["P1", "P2", "P3", "P4"].map((s) => `<option ${b.priority === s ? "selected" : ""}>${s}</option>`).join("")}</select></label>
+        <label class="field">Status<select data-f="status">${["New", "Reopened", "Open"].map((s) => `<option ${b.status === s ? "selected" : ""}>${s}</option>`).join("")}</select></label>
+        <label class="field">Classification<input type="text" data-f="classification" value="${attr(b.classification)}"></label>
+      </div>
+      <div class="grid-2" style="margin-top:8px;gap:8px">
+        <label class="field">Steps to reproduce (one per line)<textarea data-f="steps" rows="4" dir="auto">${esc((b.steps || []).join("\n"))}</textarea></label>
+        <div class="col"><label class="field">Expected<textarea data-f="expected" rows="2" dir="auto">${esc(b.expected)}</textarea></label><label class="field">Actual<textarea data-f="actual" rows="2" dir="auto">${esc(b.actual)}</textarea></label></div>
+      </div>
+      <div class="muted small mono ellipsis" style="margin-top:6px">${esc(b.test)}${b.shot ? " · screenshot attached" : ""}</div></div>`).join("") || '<div class="empty">No failed test.</div>'}</div>
+    <footer><span class="muted small grow">Exporting assigns bug IDs and records the report date in the defect registry.</span>
+      <button class="btn" data-dl="xlsx" ${data.formats.xlsx ? "" : "disabled title='openpyxl not installed'"}>${icon("file")} Excel</button>
+      <button class="btn primary" data-dl="docx" ${data.formats.docx ? "" : "disabled title='python-docx not installed'"}>${icon("file")} Word</button></footer>`;
+  const mount = (modal) => {
+    modal.querySelector("[data-close]").onclick = closeModal;
+    modal.querySelectorAll(".bug").forEach((el) => {
+      const b = bugs[parseInt(el.dataset.i, 10)];
+      el.querySelectorAll("[data-f]").forEach((input) => {
+        input.addEventListener(input.type === "checkbox" || input.tagName === "SELECT" ? "change" : "input", () => {
+          const k = input.dataset.f;
+          b[k] = k === "include" ? input.checked : k === "steps" ? input.value.split("\n").filter((s) => s.trim()) : input.value;
+          if (k === "include") { el.classList.toggle("off", !input.checked); modal.querySelector("header .muted").textContent = `${bugs.filter((x) => x.include).length}/${bugs.length} included`; }
+          if (k === "severity") { const map = { Critical: "P1", High: "P2", Medium: "P3", Low: "P4" }; b.priority = map[input.value]; el.querySelector('[data-f="priority"]').value = b.priority; }
+        });
+      });
+    });
+    modal.querySelectorAll("[data-dl]").forEach((btn) => btn.onclick = async () => {
+      const chosen = bugs.filter((b) => b.include);
+      if (!chosen.length) return toast("Include at least one bug", "error");
+      btn.disabled = true;
+      try { saveBlob(await api(`/api/runs/${run.id}/bugreport`, { method: "POST", body: { format: btn.dataset.dl, bugs: chosen }, blob: true })); toast("Bug report downloaded", "ok"); }
+      catch (e) { toast(e.message, "error"); } finally { btn.disabled = false; }
+    });
+  };
+  openModal(render(), mount);
+}
+</script>
+<script>
+"use strict";
+/* ============================================================== dashboard */
+const SERIES = ["var(--s1)", "var(--s2)", "var(--s3)", "var(--s4)"];
+async function loadDashboard() {
+  const d = S.dash;
+  $("dashSystem").innerHTML = [["", "All systems"], ...S.order.map((k) => [k, sysTitle(k)])].map(([k, t]) => `<button data-k="${attr(k)}" class="${d.system === k ? "on" : ""}">${esc(t)}</button>`).join("");
+  $("dashDays").innerHTML = [7, 14, 30, 90].map((n) => `<button data-n="${n}" class="${d.days === n ? "on" : ""}">${n} days</button>`).join("");
+  $("dashSystem").querySelectorAll("button").forEach((b) => b.onclick = () => { d.system = b.dataset.k; loadDashboard(); });
+  $("dashDays").querySelectorAll("button").forEach((b) => b.onclick = () => { d.days = parseInt(b.dataset.n, 10); loadDashboard(); });
+  const qs = `days=${d.days}${d.system ? "&system=" + d.system : ""}`;
+  const [data, rel, storage] = await Promise.all([api("/api/dashboard?" + qs), api("/api/reliability" + (d.system ? "?system=" + d.system : "")), api("/api/storage")].map((p) => p.catch((e) => ({ error: e.message }))));
+  if (data.error) { $("dashBody").innerHTML = `<div class="empty">${esc(data.error)}</div>`; return; }
+  d.data = data; S.reliability = rel;
+  $("dashGenerated").textContent = "updated " + fmtDate(data.generated);
+  $("dashBody").innerHTML = `
+    <div class="health">${data.systems.map(healthCard).join("")}</div>
+    <div class="card" style="margin-top:16px"><header><h2>Pass rate per run</h2><div class="legend right">${data.systems.map((s, i) => `<span><i style="background:${SERIES[i % 4]}"></i>${esc(s.title)}</span>`).join("")}</div></header><div class="body">${trendChart(data)}</div></div>
+    <div class="card" style="margin-top:16px"><header><h2>Open defects</h2><span class="badge fail">${data.openDefects.length}</span><span class="muted small">latest result of every test in the period · quarantined and "not a bug" excluded</span>
+      ${data.openDefects.length ? `<button class="btn sm right" id="retestAll">${icon("redo")} Retest all shown</button>` : ""}</header><div class="body tight scroll h520">${defectsTable(data.openDefects)}</div></div>
+    <div class="grid-2" style="margin-top:16px">
+      <div class="card"><header><h2>Fixed in the period</h2><span class="badge pass">${data.fixed.length}</span></header><div class="body tight scroll h360">${fixedTable(data.fixed)}</div></div>
+      <div class="card"><header><h2>Environment availability</h2><span class="muted small">uptime check every ${Math.round((data.uptimeEvery || 300) / 60)} min + time covered by runs</span></header><div class="body">${availabilityView(data)}</div></div>
+    </div>
+    <div class="card" style="margin-top:16px"><header><h2>Module map</h2><span class="muted small">latest results over the configured modules</span></header><div class="body">${moduleMap(data)}</div></div>
+    <div class="grid-2" style="margin-top:16px">
+      <div class="card"><header><h2>Most failing tests</h2></header><div class="body tight scroll h360">${rankTable(data.mostFailing, (r) => `<b style="color:var(--fail)">${r.failures}</b>/${r.runs} runs`)}</div></div>
+      <div class="card"><header><h2>Slowest tests</h2></header><div class="body tight scroll h360">${rankTable(data.slowest, (r) => `${fmtSecs(r.avg)} avg · max ${fmtSecs(r.max)}`)}</div></div>
+    </div>
+    <div class="card" style="margin-top:16px" id="reliabilitySection"><header><h2>Reliability</h2><span class="muted small">flaky tests, quarantine, cut-off runs, environment retries</span></header><div class="body">${reliabilityView(rel)}</div></div>
+    <div class="grid-2" style="margin-top:16px">
+      <div class="card"><header><h2>Report history (Maven / CLI runs)</h2><span class="muted small">test-execution-reports · read-only evidence</span></header><div class="body tight scroll h360" id="archiveBox"><div class="empty">Loading…</div></div></div>
+      <div class="card"><header><h2>Storage</h2></header><div class="body">${storageView(storage)}</div></div>
+    </div>`;
+  bindDashboard();
+  loadArchive();
+}
+function healthCard(s) {
+  const h = s.health, q = s.quality, a = s.availability || {}, last = s.lastFullRun;
+  return `<div class="hcard ${attr(h.color)}">
+    <div class="row between"><b>${esc(s.title)}</b><span class="muted small">${q.runs} run(s) · ${q.tests} tests</span></div>
+    <div class="status"><span>${h.emoji}</span><span dir="rtl">${esc(h.label)}</span></div>
+    <div class="headline" dir="auto">${esc(h.headline || "")}</div>
+    <div class="metrics">
+      <div><b>${q.passRate === null ? "—" : q.passRate + "%"}</b>pass rate</div>
+      <div><b style="${q.open ? "color:var(--fail)" : ""}">${q.open}</b>open defects</div>
+      <div><b style="${q.severity.Critical ? "color:var(--fail)" : ""}">${q.severity.Critical}</b>critical</div>
+      <div><b>${q.reopenRate}%</b>reopen rate</div>
+      <div><b>${q.flakyRate}%</b>flaky rate</div>
+      <div><b>${a.percent === null || a.percent === undefined ? "—" : a.percent + "%"}</b>availability</div>
+    </div>
+    <div class="row small" style="margin-top:10px">${["Critical", "High", "Medium", "Low", "Unrated"].map((k) => q.severity[k] ? `<span class="badge ${k === "Unrated" ? "outline" : k}">${q.severity[k]} ${k}</span>` : "").join("")}
+      ${q.bugChecks ? `<span class="badge soft">${q.bugChecks} bug checks</span>` : ""}${q.quarantined ? `<span class="badge outline">${q.quarantined} quarantined</span>` : ""}</div>
+    <div class="small" style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px">Last full run: ${last ? `<a href="#run=${attr(last.id)}">${esc(fmtDate(last.finished))}</a> · ${statusChip(last.status)} · ${esc(last.age)}${last.counts ? ` · ${last.counts.passed}✓ ${last.counts.failed + last.counts.broken}✗` : ""}` : '<span class="muted">none yet</span>'}</div>
+  </div>`;
+}
+function trendChart(data) {
+  const points = data.trend.filter((t) => t.passRate !== null);
+  if (!points.length) return '<div class="empty">No completed run in the period.</div>';
+  const W = 900, H = 190, L = 34, R = 10, T = 10, B = 24;
+  const times = points.map((p) => new Date(p.created).getTime());
+  const t0 = Math.min(...times), t1 = Math.max(...times) || t0 + 1;
+  const x = (t) => L + (t1 === t0 ? (W - L - R) / 2 : ((t - t0) / (t1 - t0)) * (W - L - R));
+  const y = (v) => T + (1 - v / 100) * (H - T - B);
+  const grid = [0, 25, 50, 75, 95, 100].map((v) => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" ${v === 95 ? 'stroke-dasharray="4 4"' : ""}/>${v === 95 ? `<text x="${W - R - 70}" y="${y(v) + 11}">95% target</text>` : `<text x="4" y="${y(v) + 3}">${v}%</text>`}`).join("");
+  const series = data.systems.map((s, i) => {
+    const pts = points.filter((p) => p.system === s.key);
+    if (!pts.length) return "";
+    const path = pts.map((p, j) => `${j ? "L" : "M"}${x(new Date(p.created).getTime()).toFixed(1)},${y(p.passRate).toFixed(1)}`).join(" ");
+    return `<path d="${path}" fill="none" stroke="${SERIES[i % 4]}" stroke-width="2"/>` + pts.map((p) => `<a href="#run=${attr(p.id)}"><circle cx="${x(new Date(p.created).getTime()).toFixed(1)}" cy="${y(p.passRate).toFixed(1)}" r="3.5" fill="${SERIES[i % 4]}"><title>${esc(s.title)} · ${esc(fmtDate(p.created))} · ${p.passRate}% · ${p.passed}✓ ${p.failed}✗</title></circle></a>`).join("");
+  }).join("");
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><g class="grid">${grid}</g>${series}<text x="${L}" y="${H - 6}">${esc(fmtDate(new Date(t0).toISOString()))}</text><text x="${W - R - 90}" y="${H - 6}">${esc(fmtDate(new Date(t1).toISOString()))}</text></svg>`;
+}
+function defectsTable(rows) {
+  if (!rows.length) return '<div class="empty">No open defect in the period.</div>';
+  return `<table class="t"><thead><tr><th>Severity</th><th>ID</th><th>Test</th><th>Sentence for stakeholders</th><th>Kind</th><th>Status</th><th>Seen</th><th></th></tr></thead><tbody>${rows.map((d, i) => `<tr data-d="${i}">
+    <td><select data-sev style="width:auto">${["", "Critical", "High", "Medium", "Low"].map((s) => `<option value="${s}" ${(d.severity || "") === s ? "selected" : ""}>${s || "Unrated"}</option>`).join("")}</select></td>
+    <td class="nowrap">${d.id ? `<b>${esc(d.id)}</b>` : '<span class="muted">—</span>'}${S.dash.system ? "" : `<div class="muted small">${esc(sysTitle(d.system))}</div>`}</td>
+    <td style="min-width:220px"><div dir="auto">${esc(d.testId ? d.testId + " — " : "")}${esc(d.title || d.name)}</div><div class="muted small mono ellipsis" title="${attr(d.fullName)}">${esc(shortClass(d.fullName))}</div><div class="small pre" dir="auto" style="color:var(--text-2)">${esc((d.message || "").slice(0, 220))}</div></td>
+    <td style="min-width:200px"><input type="text" data-note value="${attr(d.note || "")}" dir="auto" placeholder="e.g. الفريق مش بيتحفظ"></td>
+    <td>${kindBadge(d.kind)}${d.soft ? '<div><span class="badge soft">bug check</span></div>' : ""}</td>
+    <td><span class="badge ${attr(d.status)}">${esc(d.status)}</span>${d.reported && d.reported.length ? `<div class="muted small">reported ${esc(d.reported[d.reported.length - 1])}</div>` : ""}</td>
+    <td class="small nowrap">${d.first ? `first ${esc(d.first)}<br>` : ""}<a href="#run=${attr(d.run)}">last run</a></td>
+    <td class="nowrap"><button class="btn xs" data-save>Save</button> <button class="btn xs" data-retest title="Retest this test">${icon("redo")}</button> <button class="btn xs ghost" data-notbug title="Reviewed: not a defect">Not a bug</button>${d.shot ? ` <button class="btn xs ghost" data-shot>🖼</button>` : ""}</td></tr>`).join("")}</tbody></table>`;
+}
+function fixedTable(rows) {
+  if (!rows.length) return '<div class="empty">Nothing fixed in the period.</div>';
+  return `<table class="t"><thead><tr><th>Test</th><th>Failed in</th><th>Fixed in</th></tr></thead><tbody>${rows.map((f) => `<tr><td><div dir="auto">${f.id ? `<b>${esc(f.id)}</b> ` : ""}${esc(f.testId ? f.testId + " — " : "")}${esc(f.title || f.name)}</div><div class="muted small mono">${esc(shortClass(f.fullName))}</div></td>
+    <td class="small"><a href="#run=${attr(f.failedIn)}">${esc(f.failedIn)}</a></td><td class="small"><a href="#run=${attr(f.fixedIn)}">${esc(f.fixedIn)}</a><div class="muted">${esc(fmtDate(f.fixedAt))}</div></td></tr>`).join("")}</tbody></table>`;
+}
+function availabilityView(data) {
+  return data.systems.map((s) => {
+    const a = s.availability || {};
+    return `<div style="margin-bottom:12px"><div class="row between"><b>${esc(s.title)}</b><span>${a.percent === null || a.percent === undefined ? '<span class="muted">no data</span>' : `<b>${a.percent}%</b> up`} · ${a.hoursDown || 0} h down · ${a.checks || 0} checks${a.monitoring ? "" : " · monitoring off"}</span></div>
+      ${a.lastCheck ? `<div class="muted small">last check ${esc(fmtDate(a.lastCheck.t))}: ${a.lastCheck.up ? "up" : "DOWN"} · ${esc(a.lastCheck.ms)} ms</div>` : ""}
+      ${(a.outages || []).length ? `<table class="t" style="margin-top:6px"><tbody>${a.outages.map((o) => `<tr><td class="small">${esc(fmtDate(o.from))} → ${o.ongoing ? "<b>ongoing</b>" : esc(fmtDate(o.to))}</td><td class="small">${o.minutes} min</td><td class="small muted">${esc(o.detail || "")}</td></tr>`).join("")}</tbody></table>` : '<div class="muted small">No outage recorded.</div>'}</div>`;
+  }).join("");
+}
+function moduleMap(data) {
+  return Object.entries(data.modules).map(([key, rows]) => `<div style="margin-bottom:14px">${Object.keys(data.modules).length > 1 ? `<h3>${esc(sysTitle(key))}</h3>` : ""}
+    ${rows.map((m, i) => { const id = key + ":" + i; const open = S.dash.open[id];
+      return `<div class="module"><div class="head" data-mod="${attr(id)}"><span>${open ? "▾" : "▸"}</span><b class="grow">${esc(m.name)}</b><span class="badge ${attr(m.status)}">${esc(m.status)}</span>
+        <span class="small muted">${m.tests} tests · ${m.executed} executed</span><div style="width:120px"><div class="bar"><i class="p" style="width:${m.executed ? 100 * m.passed / Math.max(m.tests, m.executed) : 0}%"></i><i class="f" style="width:${m.executed ? 100 * m.failed / Math.max(m.tests, m.executed) : 0}%"></i></div></div>
+        <span class="small">${m.passed}✓ ${m.failed ? `<b style="color:var(--fail)">${m.failed}✗</b>` : "0✗"}</span></div>
+        ${open ? `<div class="list">${m.note ? `<div class="muted" style="margin-bottom:6px">${esc(m.note)}</div>` : ""}<div class="muted">Classes: ${esc(m.classes.join(", ") || "—")}</div>${m.results.length ? `<table class="t" style="margin-top:6px"><tbody>${m.results.map((t) => `<tr><td><span class="badge ${attr(t.status)}">${esc(t.status)}</span></td><td>${esc(t.testId || "")} <span class="mono muted">${esc(shortClass(t.fullName))}</span></td></tr>`).join("")}</tbody></table>` : '<div class="muted">Not executed in the period.</div>'}</div>` : ""}</div>`; }).join("") || '<div class="empty">No modules configured (Systems page).</div>'}</div>`).join("");
+}
+function rankTable(rows, metric) {
+  if (!rows.length) return '<div class="empty">No data in the period.</div>';
+  return `<table class="t"><tbody>${rows.map((r) => `<tr><td><div dir="auto">${esc(r.testId ? r.testId + " — " : "")}${esc(r.name)}</div><div class="muted small mono">${esc(shortClass(r.fullName))}${S.dash.system ? "" : " · " + esc(sysTitle(r.system))}</div></td><td class="nowrap small">${metric(r)}</td></tr>`).join("")}</tbody></table>`;
+}
+function reliabilityView(rel) {
+  if (!rel || rel.error) return `<div class="empty">${esc((rel || {}).error || "Not available")}</div>`;
+  const s = rel.settings;
+  return `<div class="muted small" style="margin-bottom:10px">Auto-quarantine ${s.auto ? "on" : "off"}: ≥${s.flips} pass/fail flips in the last ${s.window} results; released after ${s.stable} passes in a row · environment-down runs retried ${s.envRetries}× every ${s.envRetryMinutes} min.</div>` +
+    rel.systems.map((sys) => `<div style="margin-bottom:16px"><div class="row"><h3 style="margin:0">${esc(sys.title)}</h3>${sys.flaky.length ? `<button class="btn xs right" data-askflaky="${attr(sys.key)}">${icon("spark")} Ask Claude about flaky tests</button>` : ""}</div>
+      <div class="grid-2" style="margin-top:8px;gap:12px">
+        <div><div class="section-title">Flaky tests (${sys.flaky.length})</div>${sys.flaky.length ? `<table class="t"><tbody>${sys.flaky.map((f) => `<tr><td><div class="mono small">${esc(shortClass(f.test))}</div><span class="seq">${f.sequence.split("").map((c) => `<i class="${c}" title="${c === "P" ? "passed" : c === "F" ? "failed" : "passed on retry"}"></i>`).join("")}</span></td>
+          <td class="small nowrap">score ${f.score}<div class="muted">${f.flips} flips · ${f.retries} retries</div></td><td><button class="btn xs" data-q="${attr(sys.key)}|${attr(f.test)}|${f.quarantined ? 0 : 1}">${f.quarantined ? "Release" : "Quarantine"}</button></td></tr>`).join("")}</tbody></table>` : '<div class="muted small">None.</div>'}</div>
+        <div><div class="section-title">Quarantine</div>${sys.quarantine.length ? `<table class="t"><tbody>${sys.quarantine.map((q) => `<tr><td><div class="mono small">${esc(shortClass(q.test))}</div><div class="muted small">${esc(q.reason || "")}${q.by ? " · " + esc(q.by) : ""}</div></td>
+          <td>${q.on ? '<span class="badge warn">on</span>' : '<span class="badge outline">released</span>'}</td><td>${q.on ? `<button class="btn xs" data-q="${attr(sys.key)}|${attr(q.test)}|0">Release</button>` : ""}</td></tr>`).join("")}</tbody></table>` : '<div class="muted small">No test quarantined.</div>'}</div>
+      </div>
+      ${sys.cutOff.length ? `<div class="section-title">Cut-off runs</div><table class="t"><tbody>${sys.cutOff.map((c) => `<tr><td><a href="#run=${attr(c.id)}">${esc(c.id)}</a></td><td>${statusChip(c.status)}</td><td class="small">${c.executed}/${c.estimated} tests</td><td class="small muted">${esc((c.reason || "").slice(0, 160))}</td></tr>`).join("")}</tbody></table>` : ""}
+      ${sys.envDown.length ? `<div class="section-title">Environment-down retries</div><table class="t"><tbody>${sys.envDown.map((r) => `<tr><td><a href="#run=${attr(r.id)}">${esc(r.id)}</a></td><td>${statusChip(r.status)}</td><td class="small">retry ${r.envRetry || 0}</td><td class="small muted">${esc(r.notBefore ? "next " + fmtDate(r.notBefore) : "")}</td></tr>`).join("")}</tbody></table>` : ""}
+    </div>`).join("");
+}
+function storageView(st) {
+  if (!st || st.error) return `<div class="empty">${esc((st || {}).error || "Not available")}</div>`;
+  const used = st.disk.total ? 100 * st.disk.used / st.disk.total : 0;
+  return `<div class="small">Disk: <b>${fmtBytes(st.disk.free)}</b> free of ${fmtBytes(st.disk.total)}</div><div class="bar" style="margin:6px 0 12px"><i class="${used > 90 ? "f" : "r"}" style="width:${used}%"></i></div>
+    <table class="t"><thead><tr><th>System</th><th>Runs</th><th>Local reports</th><th>Spaces</th></tr></thead><tbody>${st.systems.map((s) => `<tr><td>${esc(s.title)}</td><td>${s.runs}</td><td>${fmtBytes(s.localBytes)}</td><td>${fmtBytes(s.spacesBytes)}</td></tr>`).join("") || '<tr><td colspan="4" class="muted">No runs.</td></tr>'}</tbody></table>
+    <div class="muted small" style="margin:8px 0">Snapshots ${fmtBytes(st.snapshotsBytes)} · results in ${esc(st.store.detail)} · Spaces ${st.spaces.enabled ? `on (${esc(st.spaces.bucket)})` : "off: " + esc(st.spaces.reason)}</div>
+    <div class="section-title">Clean up</div>
+    <div class="row"><label class="field">Keep newest<input type="number" id="cleanKeep" min="0" value="10" style="width:80px"></label>
+      <label class="field">Systems<select id="cleanSys"><option value="">All</option>${S.order.map((k) => `<option value="${attr(k)}">${esc(sysTitle(k))}</option>`).join("")}</select></label>
+      <label class="field">Remove<select id="cleanMode"><option value="reports">reports only (keep results)</option><option value="runs">whole runs</option></select></label>
+      <button class="btn sm danger" id="cleanBtn" style="align-self:flex-end">${icon("trash")} Clean</button></div>`;
+}
+async function loadArchive() {
+  const box = $("archiveBox"); if (!box) return;
+  const data = await api("/api/archive?limit=40" + (S.dash.system ? "&system=" + S.dash.system : "")).catch(() => null);
+  if (!data || !data.runs.length) { box.innerHTML = '<div class="empty">No archived CLI run.</div>'; return; }
+  box.innerHTML = `<table class="t"><thead><tr><th>Run</th><th>Source</th><th>Result</th><th>Features</th></tr></thead><tbody>${data.runs.map((r) => `<tr>
+    <td class="nowrap small">${esc(fmtDate(new Date(r.started).toISOString()))}<div class="muted mono">${esc(r.id)}</div></td><td class="small">${esc(r.source)}</td>
+    <td class="small nowrap">${r.counts.passed}✓ ${r.counts.failed + r.counts.broken ? `<b style="color:var(--fail)">${r.counts.failed + r.counts.broken}✗</b>` : "0✗"} ${r.counts.skipped}⤼${r.report ? ` · <a href="/archive/${attr(r.source)}/${attr(r.id)}/${attr(r.report)}" target="_blank">Allure</a>` : ""}</td>
+    <td class="small muted">${esc((r.features || []).slice(0, 3).join(", "))}${(r.features || []).length > 3 ? "…" : ""}</td></tr>`).join("")}</tbody></table>`;
+}
+function bindDashboard() {
+  const body = $("dashBody"), data = S.dash.data;
+  body.querySelectorAll("[data-mod]").forEach((el) => el.onclick = () => { S.dash.open[el.dataset.mod] = !S.dash.open[el.dataset.mod]; loadDashboard(); });
+  body.querySelectorAll("tr[data-d]").forEach((tr) => {
+    const d = data.openDefects[parseInt(tr.dataset.d, 10)];
+    tr.querySelector("[data-save]").onclick = async () => {
+      const entry = await act(post("/api/bugs/rate", { run: d.run, test: d.fullName, severity: tr.querySelector("[data-sev]").value || null, note: tr.querySelector("[data-note]").value }));
+      if (entry) { toast(`Saved ${entry.id}`, "ok"); loadDashboard(); }
+    };
+    tr.querySelector("[data-retest]").onclick = async () => { const r = await act(post("/api/defects/retest", { run: d.run, test: d.fullName })); if (r) toast(`Retest queued (${r.id})`, "ok"); refreshRuns(); };
+    tr.querySelector("[data-notbug]").onclick = async () => { if (!confirm("Mark as reviewed: not a defect? It leaves the open defects and release status.")) return; await act(post("/api/bugs/rate", { run: d.run, test: d.fullName, notBug: true }), "Marked as not a bug"); loadDashboard(); };
+    const shot = tr.querySelector("[data-shot]"); if (shot) shot.onclick = () => lightbox([{ src: `/runs/${d.run}/shot/${d.shot}`, caption: d.testId || d.name }], 0);
+  });
+  if ($("retestAll")) $("retestAll").onclick = async () => {
+    if (!confirm(`Queue a retest of the ${data.openDefects.length} open defect(s)?`)) return;
+    const r = await act(post("/api/defects/retest-all", { defects: data.openDefects.map((d) => ({ run: d.run, test: d.fullName })) }));
+    if (r) toast(`Queued ${r.runs.length} retest run(s)`, "ok"); refreshRuns();
+  };
+  body.querySelectorAll("[data-q]").forEach((b) => b.onclick = async () => {
+    const [system, test, on] = b.dataset.q.split("|");
+    const reason = on === "1" ? prompt("Reason for the quarantine", "flaky") : "";
+    if (on === "1" && reason === null) return;
+    await act(post("/api/reliability/quarantine", { system, test, on: on === "1", reason }), on === "1" ? "Quarantined" : "Released"); loadDashboard();
+  });
+  body.querySelectorAll("[data-askflaky]").forEach((b) => b.onclick = async () => { const r = await act(post("/api/reliability/ask-claude", { system: b.dataset.askflaky })); if (r) location.hash = "claude=" + r.id; });
+  if ($("cleanBtn")) $("cleanBtn").onclick = async () => {
+    const keep = parseInt($("cleanKeep").value || "10", 10), mode = $("cleanMode").value, system = $("cleanSys").value;
+    if (!confirm(`Remove ${mode === "runs" ? "whole runs (results included)" : "the report files"} of every finished run except the newest ${keep} per system${system ? " of " + sysTitle(system) : ""}?`)) return;
+    const r = await act(post("/api/storage/clean", { systems: system ? [system] : null, keep, mode }));
+    if (r) { toast(`Cleaned ${r.deleted.length} run(s), freed ${fmtBytes(r.freedBytes)}`, "ok"); loadDashboard(); refreshRuns(); }
+  };
+}
+$("dashRefresh").onclick = () => loadDashboard();
+
+/* ============================================================== schedules */
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+async function loadSchedules() {
+  const data = await api("/api/schedules").catch((e) => ({ error: e.message }));
+  if (data.error) { $("schedulesBody").innerHTML = `<div class="empty">${esc(data.error)}</div>`; return; }
+  S.schedules = data;
+  $("emailState").innerHTML = data.email.ready ? `✉ e-mails from <b>${esc(data.email.from)}</b> · links to ${esc(data.publicUrl)}` : `<span style="color:var(--warn)">✉ e-mail off: ${esc(data.email.reason)}</span>`;
+  if (!data.schedules.length) { $("schedulesBody").innerHTML = '<div class="card"><div class="empty">No schedule yet. Create one to run a suite every day.</div></div>'; return; }
+  $("schedulesBody").innerHTML = `<div class="grid-3">${data.schedules.map((s) => `<div class="card"><header><div class="grow"><h2>${esc(s.name)}</h2><div class="muted small">${esc(sysTitle(s.run.system))} · ${esc(s.run.env)} · ${esc(s.run.scope)}${s.run.group ? " · " + esc(s.run.group) : ""}</div></div>
+      <label class="switch"><input type="checkbox" data-toggle="${attr(s.id)}" ${s.enabled ? "checked" : ""}><span></span></label></header>
+    <div class="body"><div class="row"><b style="font-size:20px">${esc(s.trigger.time)}</b><span class="chips">${DAYS.map((d, i) => `<span class="badge ${s.trigger.days.includes(i) ? "run" : "outline"}">${d}</span>`).join("")}</span></div>
+      <dl class="kv" style="margin-top:10px"><dt>Next</dt><dd>${s.enabled && s.nextAt ? `${esc(fmtDate(s.nextAt))} <span class="muted">(${esc(ago(s.nextAt))})</span>` : '<span class="muted">disabled</span>'}</dd>
+      <dt>Last</dt><dd>${s.lastRunId ? `<a href="#run=${attr(s.lastRunId)}">${esc(fmtDate(s.lastRunAt))}</a> · ${esc(s.lastReason || "")}` : '<span class="muted">never</span>'}${s.lastError ? `<div style="color:var(--fail)" class="small">${esc(s.lastError)}</div>` : ""}</dd>
+      <dt>E-mail</dt><dd>${s.notify.emails.length ? esc(s.notify.emails.join(", ")) + (s.notify.onlyFailures ? " · failures only" : "") : '<span class="muted">none</span>'}</dd></dl>
+      <div class="row" style="margin-top:12px"><button class="btn sm" data-run="${attr(s.id)}">${icon("play")} Run now</button><button class="btn sm" data-edit="${attr(s.id)}">Edit</button>
+        <button class="btn sm" data-test="${attr(s.id)}" ${data.email.ready && s.notify.emails.length ? "" : "disabled"}>${icon("mail")} Test e-mail</button><button class="btn sm danger right" data-del="${attr(s.id)}">${icon("trash")}</button></div></div></div>`).join("")}</div>`;
+  const body = $("schedulesBody");
+  body.querySelectorAll("[data-toggle]").forEach((el) => el.onchange = async () => { await act(post(`/api/schedules/${el.dataset.toggle}/toggle`)); loadSchedules(); });
+  body.querySelectorAll("[data-run]").forEach((b) => b.onclick = async () => { const r = await act(post(`/api/schedules/${b.dataset.run}/run`)); if (r) { toast(`Queued ${r.id}`, "ok"); refreshRuns(); loadSchedules(); } });
+  body.querySelectorAll("[data-test]").forEach((b) => b.onclick = async () => { const r = await act(post(`/api/schedules/${b.dataset.test}/test`)); if (r) toast(`Test e-mail sent to ${r.sent} address(es)`, "ok"); });
+  body.querySelectorAll("[data-edit]").forEach((b) => b.onclick = () => editSchedule(data.schedules.find((s) => s.id === b.dataset.edit)));
+  body.querySelectorAll("[data-del]").forEach((b) => b.onclick = async () => { if (!confirm("Delete this schedule?")) return; await act(post(`/api/schedules/${b.dataset.del}/delete`), "Deleted"); loadSchedules(); });
+}
+$("newScheduleBtn").onclick = () => editSchedule(null);
+function editSchedule(existing) {
+  const sch = existing ? JSON.parse(JSON.stringify(existing)) : { name: "", enabled: true, trigger: { type: "daily", time: "08:00", days: [0, 1, 2, 3, 6] },
+    run: { system: S.system, env: S.systems[S.system].defaultEnv, scope: "full", classes: [], modules: [], group: null, threads: 1, execution: "LocalHeadless", browser: "Chrome", pace: "fast", preflight: true, retry: true, metrics: true, fullRun: true, extraProperties: {} },
+    notify: { emails: [], onlyFailures: false } };
+  const extraText = (r) => Object.entries(r.extraProperties || {}).map(([k, v]) => `${k}=${v}`).join("\n");
+  const render = () => {
+    const sys = S.systems[sch.run.system];
+    return `<header><h2>${existing ? "Edit schedule" : "New schedule"}</h2><button class="btn sm ghost right" data-close>${icon("x")}</button></header>
+    <div class="body"><div class="grid-2">
+      <div class="col">
+        <label class="field">Name<input type="text" id="sName" value="${attr(sch.name)}" maxlength="80" placeholder="Daily Zulfi smoke"></label>
+        <div class="row"><label class="field">Time (24h)<input type="time" id="sTime" value="${attr(sch.trigger.time)}"></label>
+          <label class="switch" style="margin-top:16px"><input type="checkbox" id="sEnabled" ${sch.enabled ? "checked" : ""}><span>Enabled</span></label></div>
+        <div class="field">Days<div class="chips">${DAYS.map((d, i) => `<button type="button" class="chip ${sch.trigger.days.includes(i) ? "on" : ""}" data-day="${i}">${d}</button>`).join("")}</div></div>
+        <label class="field">Gmail addresses (one per line)<textarea id="sEmails" rows="3" placeholder="name@gmail.com">${esc(sch.notify.emails.join("\n"))}</textarea></label>
+        <label class="switch"><input type="checkbox" id="sOnlyFail" ${sch.notify.onlyFailures ? "checked" : ""}><span>Only e-mail when something failed</span></label>
+        <div class="notice small">Scheduled runs use the credentials the runner inherits (environment or config/credentials.local.properties); logins are never stored in a schedule.</div>
+      </div>
+      <div class="col">
+        <label class="field">System<select id="sSystem">${S.order.map((k) => `<option value="${attr(k)}" ${k === sch.run.system ? "selected" : ""}>${esc(sysTitle(k))}</option>`).join("")}</select></label>
+        <label class="field">Environment<select id="sEnv">${Object.keys(sys.envs).map((e) => `<option ${e === sch.run.env ? "selected" : ""}>${esc(e)}</option>`).join("")}</select></label>
+        <label class="field">Scope<select id="sScope">${SCOPES.filter(([k]) => k !== "all").map(([k, t]) => `<option value="${k}" ${k === sch.run.scope ? "selected" : ""}>${t}</option>`).join("")}</select></label>
+        ${sch.run.scope === "classes" ? `<div class="checklist">${sys.classes.map((c) => `<label><input type="checkbox" data-scls="${attr(c.name)}" ${(sch.run.classes || []).includes(c.name) ? "checked" : ""}><span class="ellipsis">${esc(c.name)}</span><span class="count">${c.tests}</span></label>`).join("")}</div>` : ""}
+        ${sch.run.scope === "modules" ? `<div class="checklist">${sys.modules.map((m) => `<label><input type="checkbox" data-smod="${attr(m.name)}" ${(sch.run.modules || []).includes(m.name) ? "checked" : ""}><span class="ellipsis">${esc(m.name)}</span></label>`).join("")}</div>` : ""}
+        ${sys.testTypes.length ? `<label class="field">Test type<select id="sGroup"><option value="">All tests</option>${sys.testTypes.map((t) => `<option value="${attr(t.group)}" ${sch.run.group === t.group ? "selected" : ""}>${esc(t.label)}</option>`).join("")}</select></label>` : ""}
+        <div class="row"><label class="field" style="flex:1">Browser mode<select id="sExec">${MODES.filter(([k]) => k !== "Remote").map(([k, t]) => `<option value="${k}" ${sch.run.execution === k ? "selected" : ""}>${t}</option>`).join("")}</select></label>
+          <label class="field" style="flex:1">Parallel<select id="sThreads">${[1, 2, 3, 4].filter((n) => n <= sys.maxThreads).map((n) => `<option ${n === sch.run.threads ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+          <label class="field" style="flex:1">Pace<select id="sPace">${["fast", "normal", "demo"].map((p) => `<option ${p === sch.run.pace ? "selected" : ""}>${p}</option>`).join("")}</select></label></div>
+        <div class="row"><label class="switch"><input type="checkbox" id="sPre" ${sch.run.preflight ? "checked" : ""}><span>Preflight</span></label><label class="switch"><input type="checkbox" id="sRetry" ${sch.run.retry ? "checked" : ""}><span>Retry timing</span></label>
+          <label class="switch"><input type="checkbox" id="sMetrics" ${sch.run.metrics !== false ? "checked" : ""}><span>Success criteria</span></label><label class="switch"><input type="checkbox" id="sFull" ${sch.run.fullRun ? "checked" : ""}><span>Full run</span></label></div>
+        <label class="field">Extra JVM properties<textarea id="sExtra" rows="3" class="mono">${esc(extraText(sch.run))}</textarea></label>
+      </div></div></div>
+    <footer><button class="btn" data-close>Cancel</button><button class="btn primary" id="sSave">Save schedule</button></footer>`;
+  };
+  const read = () => {
+    const v = (id) => $(id) ? $(id).value : undefined;
+    sch.name = v("sName"); sch.trigger.time = v("sTime"); sch.enabled = $("sEnabled").checked;
+    sch.notify.emails = v("sEmails").split(/[\n,;]+/).map((x) => x.trim()).filter(Boolean); sch.notify.onlyFailures = $("sOnlyFail").checked;
+    sch.run.env = v("sEnv"); sch.run.scope = v("sScope"); sch.run.group = v("sGroup") || null; sch.run.execution = v("sExec"); sch.run.threads = parseInt(v("sThreads") || "1", 10); sch.run.pace = v("sPace");
+    sch.run.preflight = $("sPre").checked; sch.run.retry = $("sRetry").checked; sch.run.metrics = $("sMetrics").checked; sch.run.fullRun = $("sFull").checked;
+    sch.run.extraProperties = v("sExtra");
+  };
+  const mount = (modal) => {
+    modal.querySelectorAll("[data-close]").forEach((b) => b.onclick = closeModal);
+    modal.querySelectorAll("[data-day]").forEach((b) => b.onclick = () => { read(); const d = parseInt(b.dataset.day, 10); sch.trigger.days = sch.trigger.days.includes(d) ? sch.trigger.days.filter((x) => x !== d) : [...sch.trigger.days, d].sort(); rerender(); });
+    $("sSystem").onchange = (e) => { read(); sch.run.system = e.target.value; sch.run.env = S.systems[sch.run.system].defaultEnv; sch.run.classes = []; sch.run.modules = []; sch.run.group = null; sch.run.threads = 1; rerender(); };
+    $("sScope").onchange = () => { read(); sch.run.fullRun = sch.run.scope === "full"; rerender(); };
+    modal.querySelectorAll("[data-scls]").forEach((el) => el.onchange = () => { const set = new Set(sch.run.classes || []); el.checked ? set.add(el.dataset.scls) : set.delete(el.dataset.scls); sch.run.classes = [...set]; });
+    modal.querySelectorAll("[data-smod]").forEach((el) => el.onchange = () => { const set = new Set(sch.run.modules || []); el.checked ? set.add(el.dataset.smod) : set.delete(el.dataset.smod); sch.run.modules = [...set]; });
+    $("sSave").onclick = async () => { read(); const saved = await act(post("/api/schedules", { ...sch, id: existing ? existing.id : undefined }), "Schedule saved"); if (saved) { closeModal(); loadSchedules(); } };
+  };
+  const rerender = () => { const modal = $("modalRoot").querySelector(".modal"); modal.innerHTML = render(); mount(modal); };
+  openModal(render(), mount);
+}
+
+/* ============================================================== Claude */
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => { const r = new FileReader(); r.onload = () => resolve(String(r.result).split(",")[1] || ""); r.onerror = reject; r.readAsDataURL(file); });
+}
+async function readFiles(input) { const out = []; for (const f of input.files || []) out.push({ name: f.name, data: await fileToBase64(f) }); return out; }
+async function loadClaude() {
+  const data = await api("/api/agent").catch((e) => ({ error: e.message }));
+  if (data.error) { $("claudeStatus").innerHTML = `<div class="empty">${esc(data.error)}</div>`; return; }
+  S.claude = data;
+  renderClaudeStatus(); renderClaudeForm(); renderClaudeList();
+  if (S.claudeId) loadClaudeDetail(true);
+}
+function renderClaudeStatus() {
+  const st = S.claude.status, auth = st.auth || {}, login = st.login || {};
+  $("claudeState").innerHTML = !st.installed ? '<span class="badge fail">not installed</span>' : auth.loggedIn ? '<span class="badge pass">signed in</span>' : '<span class="badge warn">not signed in</span>';
+  $("claudeStatus").innerHTML = !st.installed ? `<div class="notice warn">Claude Code is not installed on the runner machine. Install it (<code>npm install -g @anthropic-ai/claude-code</code>) or set <code>RUNNER_CLAUDE</code> to its path, then reload.</div>` : `
+    <dl class="kv"><dt>Binary</dt><dd class="mono">${esc(st.binary)}</dd><dt>Version</dt><dd>${esc(st.version || "—")}</dd><dt>Model</dt><dd>${esc(st.model || "default")}</dd>
+    <dt>Budget</dt><dd>${st.budgetUsd ? "$" + esc(st.budgetUsd) + " per request" : "no cap"}</dd><dt>Work folder</dt><dd class="mono small">${esc(st.work)}</dd>
+    <dt>Account</dt><dd>${auth.loggedIn ? esc(auth.method === "api-key" ? "ANTHROPIC_API_KEY" : JSON.stringify(auth.detail || {})) : '<span class="muted">not signed in</span>'}</dd></dl>
+    ${login.active ? `<div class="notice" style="margin-top:10px">1. Open <a href="${attr(login.url || "#")}" target="_blank" rel="noopener">${esc(login.url || "the sign-in link (waiting…)")}</a> and sign in.<br>2. Paste the code it shows:</div>
+      <div class="inline" style="margin-top:8px"><input type="text" id="authCode" placeholder="code"><button class="btn primary sm" id="authSend">Submit</button><button class="btn sm" id="authCancel">Cancel</button></div>` :
+      auth.loggedIn ? (auth.method === "api-key" ? "" : `<button class="btn sm" id="authLogout" style="margin-top:10px">Sign out</button>`) :
+      `<div class="row" style="margin-top:10px"><button class="btn primary sm" data-login="claudeai">Sign in (Claude account)</button><button class="btn sm" data-login="console">Sign in (Console, API billing)</button></div>`}
+    ${login.output && !auth.loggedIn ? `<pre class="console" style="margin-top:8px;max-height:120px">${esc(login.output)}</pre>` : ""}`;
+  const box = $("claudeStatus");
+  box.querySelectorAll("[data-login]").forEach((b) => b.onclick = async () => { await act(post("/api/agent/auth/login", { method: b.dataset.login })); loadClaude(); });
+  if ($("authSend")) $("authSend").onclick = async () => { await act(post("/api/agent/auth/code", { code: $("authCode").value }), "Code sent"); loadClaude(); };
+  if ($("authCancel")) $("authCancel").onclick = async () => { await act(post("/api/agent/auth/cancel")); loadClaude(); };
+  if ($("authLogout")) $("authLogout").onclick = async () => { if (confirm("Sign Claude Code out on the runner machine?")) { await act(post("/api/agent/auth/logout")); loadClaude(); } };
+}
+function renderClaudeForm() {
+  if ($("cText")) return;
+  $("claudeForm").innerHTML = `<div class="col">
+    <label class="field">System<select id="cSystem">${S.order.map((k) => `<option value="${attr(k)}" ${k === S.system ? "selected" : ""}>${esc(sysTitle(k))}</option>`).join("")}</select></label>
+    <div class="seg" id="cMode"><button data-m="code" class="on">Change code</button><button data-m="read">Read only (analysis)</button></div>
+    <label class="field">Request<textarea id="cText" rows="6" dir="auto" placeholder="مثال: أضف اختبار يتأكد أن ترتيب الدوري يطابق جدول المباريات…"></textarea></label>
+    <label class="field">Files (stories, Excel, screenshots…)<input type="file" id="cFiles" multiple></label>
+    <label class="switch"><input type="checkbox" id="cAuto"><span>After I merge, run the changed test classes<small>queued automatically from the merged code</small></span></label>
+    <div class="muted small">Claude works in a private copy of the project; nothing reaches the project until you review the diff and merge it.</div>
+    <button class="btn primary" id="cSend">${icon("spark")} Send to Claude</button></div>`;
+  let mode = "code";
+  $("cMode").querySelectorAll("button").forEach((b) => b.onclick = () => { mode = b.dataset.m; $("cMode").querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b)); });
+  $("cSend").onclick = async () => {
+    $("cSend").disabled = true;
+    try {
+      const files = await readFiles($("cFiles"));
+      const req = await post("/api/agent", { system: $("cSystem").value, text: $("cText").value, files, autoRun: $("cAuto").checked, mode });
+      toast("Request started", "ok"); $("cText").value = ""; $("cFiles").value = ""; location.hash = "claude=" + req.id;
+    } catch (e) { toast(e.message, "error", 8000); } finally { $("cSend").disabled = false; }
+  };
+}
+function renderClaudeList() {
+  const list = S.claude.requests;
+  $("claudeMeta").textContent = `${list.length} request(s)`;
+  if (!list.length) { $("claudeList").innerHTML = '<div class="empty">No request yet.</div>'; return; }
+  $("claudeList").innerHTML = `<table class="t"><thead><tr><th>Status</th><th>Request</th><th>Changes</th><th>Created</th></tr></thead><tbody>${list.map((r) => `<tr class="click ${r.id === S.claudeId ? "sel" : ""}" data-req="${attr(r.id)}">
+    <td><span class="badge ${{ running: "run", preparing: "run", done: "pass", failed: "fail", stopped: "", interrupted: "warn", discarded: "outline" }[r.status] || ""}">${esc(r.status)}</span>${r.merged ? ' <span class="badge pass">merged</span>' : ""}</td>
+    <td><div dir="auto" class="ellipsis" style="max-width:360px">${esc(r.title)}</div><div class="muted small">${esc(sysTitle(r.system))} · ${esc(r.mode)}${r.origin && r.origin.type !== "manual" ? " · from " + esc(r.origin.type) : ""}${r.costUsd ? ` · $${r.costUsd}` : ""}</div></td>
+    <td class="small">${r.changed ? r.changed + " file(s)" : "—"}</td><td class="small nowrap">${esc(fmtDate(r.created))}</td></tr>`).join("")}</tbody></table>`;
+  $("claudeList").querySelectorAll("[data-req]").forEach((tr) => tr.onclick = () => { location.hash = "claude=" + tr.dataset.req; });
+}
+async function loadClaudeDetail(reset) {
+  if (!S.claudeId) return;
+  if (reset || !S.claudeDetail || S.claudeDetail.id !== S.claudeId) { S.claudeEvents = []; S.claudeAfter = 0; S.claudeDiff = null; }
+  const data = await api(`/api/agent/${encodeURIComponent(S.claudeId)}?after=${S.claudeAfter}`).catch((e) => ({ error: e.message }));
+  if (data.error) { $("claudeDetail").innerHTML = `<div class="empty">${esc(data.error)}</div>`; return; }
+  const before = S.claudeDetail && S.claudeDetail.id === data.id ? S.claudeDetail.status : null;
+  S.claudeDetail = data;
+  S.claudeEvents = S.claudeEvents.concat(data.eventsAfter || []);
+  if (S.claudeEvents.length) S.claudeAfter = S.claudeEvents[S.claudeEvents.length - 1].seq;
+  if (before !== data.status) S.claudeDiff = null;
+  renderClaudeDetail();
+}
+function renderClaudeDetail() {
+  const r = S.claudeDetail; if (!r) return;
+  const running = ["running", "preparing", "stopping"].includes(r.status);
+  const tabs = [["log", `Log (${S.claudeEvents.length})`], ["result", "Answer"], ["changes", `Changes (${(r.changed || []).length})`], ["prompt", "Prompt"]];
+  $("claudeDetail").innerHTML = `<header><div class="grow"><div class="row"><h2 dir="auto">${esc(r.title)}</h2><span class="badge">${esc(r.status)}</span>${r.merged ? '<span class="badge pass">merged</span>' : ""}</div>
+      <div class="muted small">${esc(r.id)} · ${esc(sysTitle(r.system))} · ${esc(r.mode)} · ${esc(fmtDate(r.created))}${r.costUsd ? ` · $${r.costUsd}` : ""}${r.turns ? ` · ${r.turns} turns` : ""}${r.origin && r.origin.id ? ` · from <a href="#${r.origin.type === "job" ? "job" : "run"}=${attr(r.origin.id)}">${esc(r.origin.type)} ${esc(r.origin.id)}</a>` : ""}</div></div>
+    <div class="row">${running ? `<button class="btn sm danger" data-c="stop">${icon("stop")} Stop</button>` : ""}
+      ${!running && (r.changed || []).length && !r.merged && r.worktreeExists ? `<button class="btn sm primary" data-c="merge">${icon("check")} Merge</button>` : ""}
+      ${r.merged ? `<button class="btn sm" data-c="undo">Undo merge</button>` : ""}
+      ${!running && r.worktreeExists && !r.merged ? `<button class="btn sm" data-c="discard">Discard copy</button>` : ""}
+      ${!running ? `<button class="btn sm danger" data-c="delete">${icon("trash")}</button>` : ""}</div></header>
+    ${r.error ? `<div class="body" style="padding-bottom:0"><div class="notice bad">${esc(r.error)}</div></div>` : ""}
+    <div class="tabbar">${tabs.map(([k, t]) => `<button data-t="${k}" class="${S.claudeTab === k ? "on" : ""}">${t}</button>`).join("")}</div>
+    <div class="body" id="claudePane"></div>
+    ${!running && r.sessionId && r.worktreeExists && !r.merged ? `<div class="body" style="border-top:1px solid var(--border)"><div class="inline"><textarea id="cReply" rows="2" dir="auto" placeholder="Reply to Claude (continues the same session)"></textarea><button class="btn primary" id="cReplyBtn">Reply</button></div></div>` : ""}`;
+  const card = $("claudeDetail");
+  card.querySelectorAll("[data-t]").forEach((b) => b.onclick = () => { S.claudeTab = b.dataset.t; renderClaudeDetail(); });
+  card.querySelectorAll("[data-c]").forEach((b) => b.onclick = () => claudeAction(b.dataset.c));
+  if ($("cReplyBtn")) $("cReplyBtn").onclick = async () => { const ok = await act(post(`/api/agent/${r.id}/reply`, { text: $("cReply").value }), "Reply sent"); if (ok) loadClaudeDetail(false); };
+  const pane = $("claudePane");
+  if (S.claudeTab === "log") {
+    pane.innerHTML = `<div class="events" id="cEvents">${S.claudeEvents.map((e) => `<div class="event ${attr(e.type)}"><div class="t">${esc(e.type)} · ${esc((e.t || "").slice(11))}</div>${e.type === "text" || e.type === "result" ? md(e.text) : e.type === "user" ? `<div class="pre small" dir="auto">${esc(e.text.slice(0, 1500))}${e.text.length > 1500 ? "…" : ""}</div>` : `<div class="pre" dir="auto">${esc(e.text)}</div>`}</div>`).join("") || '<div class="empty">Waiting for Claude…</div>'}</div>`;
+    const box = $("cEvents"); box.scrollTop = box.scrollHeight;
+  } else if (S.claudeTab === "result") {
+    pane.innerHTML = r.result ? md(r.result) : '<div class="empty">No answer yet.</div>';
+  } else if (S.claudeTab === "changes") {
+    pane.innerHTML = `<div class="col">${(r.changed || []).map((c) => `<div class="small"><span class="badge ${c.status === "added" ? "pass" : c.status === "deleted" ? "fail" : "run"}">${esc(c.status)}</span> <span class="mono">${esc(c.path)}</span></div>`).join("") || '<div class="muted">No file changed.</div>'}</div><div id="diffBox" style="margin-top:10px"></div>`;
+    if (S.claudeDiff) $("diffBox").innerHTML = diffHtml(S.claudeDiff.diff) + (S.claudeDiff.available ? "" : '<div class="muted small">The project copy was discarded; only the file list is kept.</div>');
+    else api(`/api/agent/${r.id}/diff`).then((d) => { S.claudeDiff = d; if ($("diffBox")) $("diffBox").innerHTML = diffHtml(d.diff) + (d.available ? "" : '<div class="muted small">The project copy was discarded; only the file list is kept.</div>'); }).catch(() => {});
+  } else {
+    pane.innerHTML = `<pre class="console" dir="auto">${esc(r.prompt || r.text || "")}</pre>`;
+  }
+}
+async function claudeAction(action) {
+  const r = S.claudeDetail;
+  if (action === "stop") { await act(post(`/api/agent/${r.id}/stop`), "Stopping"); }
+  if (action === "merge") {
+    let result = await act(post(`/api/agent/${r.id}/merge`, { force: false }));
+    if (result && !result.ok && result.conflicts) {
+      if (!confirm(`These project files changed since Claude's copy was taken:\n\n${result.conflicts.join("\n")}\n\nOverwrite them anyway? (undo-merge can restore them)`)) return;
+      result = await act(post(`/api/agent/${r.id}/merge`, { force: true }));
+    }
+    if (result && result.ok) { toast(`Merged ${result.files.length} file(s)` + (result.rerun ? ` · rerun ${result.rerun.id} queued` : ""), "ok"); refreshRuns(); }
+  }
+  if (action === "undo") { if (!confirm("Restore the project files as they were before the merge?")) return; const res = await act(post(`/api/agent/${r.id}/undo-merge`)); if (res) toast("Merge undone" + (res.changedSince.length ? ` (also reverted later edits in ${res.changedSince.length} file(s))` : ""), "ok"); }
+  if (action === "discard") { if (!confirm("Delete Claude's copy of the project? The request and its log stay.")) return; await act(post(`/api/agent/${r.id}/discard`), "Discarded"); }
+  if (action === "delete") { if (!confirm("Delete this request, its log and its copy?")) return; await act(post(`/api/agent/${r.id}/delete`), "Deleted"); S.claudeId = null; S.claudeDetail = null; $("claudeDetail").innerHTML = '<div class="empty">Select a request.</div>'; location.hash = "claude"; }
+  loadClaude();
+}
+async function pollClaude() {
+  if (!S.claude) return;
+  const running = S.claude.requests.some((r) => ["running", "preparing", "stopping"].includes(r.status)) || ((S.claude.status || {}).login || {}).active;
+  if (!running) return;
+  const data = await api("/api/agent").catch(() => null);
+  if (data) { S.claude = data; renderClaudeList(); if (((data.status || {}).login || {}).active || !$("authCode")) renderClaudeStatus(); }
+  if (S.claudeId) loadClaudeDetail(false);
+}
+
+/* ============================================================== orchestrator */
+async function loadJobs() {
+  const data = await api("/api/jobs").catch((e) => ({ error: e.message }));
+  if (data.error) { $("jobForm").innerHTML = `<div class="empty">${esc(data.error)}</div>`; return; }
+  S.jobs = data;
+  renderJobForm(); renderJobList();
+  if (S.jobId) loadJob();
+}
+const WF_TEXT = { sprint: "stories → design → automate → run → triage → report → release", bug: "check → automate the bug's test → run → report",
+  regression: "run → triage → report → release", retest: "retest open defects → release status" };
+function renderJobForm() {
+  const jf = S.jobForm, wfs = S.jobs.workflows, wf = wfs[jf.type];
+  if (!jf.system) jf.system = S.system;
+  const sys = S.systems[jf.system];
+  const agentSteps = wf.steps.filter((s) => s.kind.startsWith("agent") || s.kind === "triage");
+  $("jobForm").innerHTML = `<div class="col">
+    <div class="grid-2" style="gap:8px">${Object.entries(wfs).map(([k, w]) => `<button class="workflow ${k === jf.type ? "on" : ""}" data-wf="${k}"><b>${esc(w.title)}</b><span>${esc(WF_TEXT[k] || "")}</span></button>`).join("")}</div>
+    ${!S.jobs.claude.installed && agentSteps.length ? '<div class="notice warn">This workflow uses Claude Code, which is not installed on the runner machine.</div>' : ""}
+    <div class="row"><label class="field" style="flex:1">System<select id="jSystem">${S.order.map((k) => `<option value="${attr(k)}" ${k === jf.system ? "selected" : ""}>${esc(sysTitle(k))}</option>`).join("")}</select></label>
+      <label class="field" style="flex:1">Environment<select id="jEnv">${Object.keys(sys.envs).map((e) => `<option ${e === (jf.env || sys.defaultEnv) ? "selected" : ""}>${esc(e)}</option>`).join("")}</select></label></div>
+    <label class="field">Title<input type="text" id="jTitle" value="${attr(jf.title || "")}" placeholder="${attr(wf.title + " · " + sysTitle(jf.system))}"></label>
+    ${jf.type === "sprint" || jf.type === "bug" ? `<label class="field">${jf.type === "sprint" ? "Sprint stories / acceptance criteria" : "Reported bug (steps, expected, actual)"}<textarea id="jText" rows="6" dir="auto">${esc(jf.text || "")}</textarea></label>
+      <label class="field">Files<input type="file" id="jFiles" multiple></label>` : ""}
+    ${jf.type === "regression" ? `<label class="field">Regression scope<select id="jScope">${[["full", "Full suite"], ["e2e", "E2E + regression"], ["e2e-only", "E2E only"]].map(([k, t]) => `<option value="${k}" ${jf.scope === k ? "selected" : ""}>${t}</option>`).join("")}</select></label>` : ""}
+    <div class="section-title">Steps</div>
+    <div class="col">${wf.steps.map((s) => `<label class="switch"><input type="checkbox" data-step="${attr(s.key)}" ${!s.optional ? "checked disabled" : (jf.skip || []).includes(s.key) ? "" : "checked"}><span>${esc(s.title)} <span class="muted small">${esc(s.kind)}${s.approval ? " · needs approval" : ""}</span></span></label>`).join("")}</div>
+    <label class="switch"><input type="checkbox" id="jAsk" ${jf.askEach ? "checked" : ""}><span>Ask me after every step<small>otherwise only steps that need approval wait</small></span></label>
+    <label class="field">E-mail summary to (Gmail, comma separated)<input type="text" id="jEmails" value="${attr(jf.emails || "")}"></label>
+    ${agentSteps.length ? `<details><summary class="small" style="cursor:pointer;font-weight:600">Edit Claude prompts (${agentSteps.length})</summary>${agentSteps.map((s) => `<label class="field" style="margin-top:8px">${esc(s.title)}<textarea data-prompt="${attr(s.key)}" rows="4" dir="auto" placeholder="Loading default…">${esc((jf.prompts || {})[s.key] || "")}</textarea></label>`).join("")}</details>` : ""}
+    <button class="btn primary" id="jCreate">${icon("play")} Start job</button></div>`;
+  const box = $("jobForm");
+  box.querySelectorAll("[data-wf]").forEach((b) => b.onclick = () => { readJobForm(); jf.type = b.dataset.wf; jf.prompts = {}; renderJobForm(); });
+  $("jSystem").onchange = (e) => { readJobForm(); jf.system = e.target.value; jf.env = null; renderJobForm(); };
+  box.querySelectorAll("[data-prompt]").forEach(async (ta) => {
+    if (ta.value) return;
+    const d = await api(`/api/jobs/prompt?type=${jf.type}&step=${ta.dataset.prompt}&system=${jf.system}`).catch(() => null);
+    if (d && !ta.value) { ta.value = d.prompt; ta.dataset.default = d.prompt; }
+  });
+  $("jCreate").onclick = async () => {
+    readJobForm();
+    const prompts = {};
+    box.querySelectorAll("[data-prompt]").forEach((ta) => { if (ta.value.trim() && ta.value !== ta.dataset.default) prompts[ta.dataset.prompt] = ta.value; });
+    const steps = wf.steps.filter((s) => !s.optional || !(jf.skip || []).includes(s.key)).map((s) => s.key);
+    $("jCreate").disabled = true;
+    try {
+      const files = $("jFiles") ? await readFiles($("jFiles")) : [];
+      const job = await post("/api/jobs", { type: jf.type, system: jf.system, env: jf.env, title: jf.title, text: jf.text, files, scope: jf.scope, emails: jf.emails, steps, askEach: jf.askEach, prompts });
+      toast("Job started", "ok"); S.jobForm = { type: jf.type, system: jf.system }; location.hash = "job=" + job.id;
+    } catch (e) { toast(e.message, "error", 8000); } finally { if ($("jCreate")) $("jCreate").disabled = false; }
+  };
+}
+function readJobForm() {
+  const jf = S.jobForm, v = (id) => ($(id) ? $(id).value : undefined);
+  jf.env = v("jEnv") || jf.env; jf.title = v("jTitle"); jf.text = v("jText"); jf.scope = v("jScope") || jf.scope; jf.emails = v("jEmails");
+  jf.askEach = $("jAsk") ? $("jAsk").checked : jf.askEach;
+  jf.skip = [...document.querySelectorAll("#jobForm [data-step]")].filter((el) => !el.checked && !el.disabled).map((el) => el.dataset.step);
+}
+function jobBadge(status) { return `<span class="badge ${{ running: "run", waiting: "warn", done: "pass", failed: "fail", cancelled: "outline" }[status] || ""}">${esc(status)}</span>`; }
+function renderJobList() {
+  const list = S.jobs.jobs;
+  $("jobsMeta").textContent = `${list.length} job(s)`;
+  if (!list.length) { $("jobsList").innerHTML = '<div class="empty">No job yet.</div>'; return; }
+  $("jobsList").innerHTML = `<table class="t"><thead><tr><th>Status</th><th>Job</th><th>Steps</th><th>Created</th></tr></thead><tbody>${list.map((j) => `<tr class="click ${j.id === S.jobId ? "sel" : ""}" data-job="${attr(j.id)}">
+    <td>${jobBadge(j.status)}</td><td><div dir="auto">${esc(j.title)}</div><div class="muted small">${esc(j.type)} · ${esc(sysTitle(j.system))}</div></td>
+    <td><div class="bar" style="width:120px"><i class="p" style="width:${100 * j.steps.filter((s) => s.status === "done" || s.status === "skipped").length / Math.max(1, j.steps.length)}%"></i></div><div class="muted small">${j.steps.filter((s) => s.status === "done").length}/${j.steps.length}${j.status === "waiting" ? " · waiting for you" : ""}</div></td>
+    <td class="small nowrap">${esc(fmtDate(j.created))}</td></tr>`).join("")}</tbody></table>`;
+  $("jobsList").querySelectorAll("[data-job]").forEach((tr) => tr.onclick = () => { location.hash = "job=" + tr.dataset.job; });
+}
+async function loadJob() {
+  const job = await api("/api/jobs/" + encodeURIComponent(S.jobId)).catch((e) => ({ error: e.message }));
+  if (job.error) { $("jobDetail").innerHTML = `<div class="empty">${esc(job.error)}</div>`; return; }
+  const changed = !S.job || JSON.stringify(S.job) !== JSON.stringify(job);
+  S.job = job;
+  if (changed) renderJob();
+}
+function renderJob() {
+  const j = S.job;
+  S.jobOpen = S.jobOpen || {};
+  const current = j.steps[j.current];
+  $("jobDetail").innerHTML = `<header><div class="grow"><div class="row"><h2 dir="auto">${esc(j.title)}</h2>${jobBadge(j.status)}</div>
+      <div class="muted small">${esc(j.id)} · ${esc(j.type)} · ${esc(sysTitle(j.system))} · ${esc(fmtDate(j.created))}${j.emails.length ? " · ✉ " + esc(j.emails.join(", ")) : ""}</div></div>
+    <div class="row">${["running", "waiting", "failed"].includes(j.status) ? `<button class="btn sm danger" data-j="cancel">Cancel job</button>` : ""}${j.status === "failed" ? `<button class="btn sm primary" data-j="retry">${icon("redo")} Retry step</button>` : ""}
+      ${["done", "cancelled", "failed"].includes(j.status) ? `<button class="btn sm danger" data-j="delete">${icon("trash")}</button>` : ""}</div></header>
+    <div class="body">${j.error ? `<div class="notice bad" style="margin-bottom:10px">${esc(j.error)}</div>` : ""}
+    ${j.text ? `<details style="margin-bottom:10px"><summary class="small" style="cursor:pointer;font-weight:600">Request</summary><div class="pre small" dir="auto" style="margin-top:6px">${esc(j.text)}</div></details>` : ""}
+    <div class="steps">${j.steps.map((s, i) => {
+      const open = S.jobOpen[i] !== undefined ? S.jobOpen[i] : (i === j.current || s.status === "waiting" || s.status === "failed");
+      const waiting = s.status === "waiting" && i === j.current;
+      return `<div class="step ${attr(s.status)}"><div class="head" data-open="${i}"><span class="num">${s.status === "done" ? "✓" : s.status === "failed" ? "!" : i + 1}</span><b class="grow">${esc(s.title)}</b>
+        <span class="badge outline">${esc(s.kind)}</span><span class="badge ${{ done: "pass", failed: "fail", running: "run", waiting: "warn" }[s.status] || ""}">${esc(s.status)}</span>
+        <span class="muted small">${s.started ? fmtSecs(((s.finished ? new Date(s.finished) : new Date()) - new Date(s.started)) / 1000) : ""}</span></div>
+        ${open ? `<div class="content">
+          ${s.error ? `<div class="notice bad" style="margin-top:10px">${esc(s.error)}</div>` : ""}
+          ${s.note ? `<div class="notice" style="margin-top:10px">Reviewer note: ${esc(s.note)}</div>` : ""}
+          ${s.output ? `<div style="margin-top:10px">${md(s.output)}</div>` : s.status === "running" ? '<div class="empty">Working…</div>' : ""}
+          <div class="row small" style="margin-top:8px">${(s.runIds || []).map((r) => `<a class="badge run" href="#run=${attr(r)}">run ${esc(r)}</a>`).join("")}${(s.agentIds || []).map((a) => `<a class="badge triage" href="#claude=${attr(a)}">Claude ${esc(a)}</a>`).join("")}
+            ${(s.files || []).map((f) => `<a class="badge pass" href="/api/jobs/${attr(j.id)}/file/${encodeURIComponent(f)}">${icon("file")} ${esc(f)}</a>`).join("")}</div>
+          ${waiting ? `<div class="notice warn" style="margin-top:10px">This step waits for your decision.${s.kind.startsWith("agent-code") || s.kind === "triage" ? " Approve merges Claude's changes into the project — review the diff in the Claude request first." : ""}</div>
+            <textarea id="jNote" rows="2" dir="auto" placeholder="Note for Claude when you redo the step" style="margin-top:8px"></textarea>
+            <div class="row" style="margin-top:8px"><button class="btn sm primary" data-d="approve">${icon("check")} Approve</button><button class="btn sm" data-d="redo">${icon("redo")} Redo with note</button><button class="btn sm" data-d="skip">Skip</button></div>` : ""}
+          <div class="row" style="margin-top:10px">${s.output ? `<a class="btn xs" href="/api/jobs/${attr(j.id)}/steps/${i}/report">${icon("file")} Word</a>` : ""}
+            ${s.kind.startsWith("agent") || s.kind === "triage" ? `<button class="btn xs" data-prompt="${i}">Prompt</button>` : ""}
+            ${["done", "skipped", "failed"].includes(s.status) && j.status !== "running" && (j.status !== "waiting") ? `<button class="btn xs" data-rerun="${i}">${icon("redo")} Run again from here</button>` : ""}</div>
+        </div>` : ""}</div>`; }).join("")}</div></div>`;
+  const card = $("jobDetail");
+  card.querySelectorAll("[data-open]").forEach((el) => el.onclick = () => { const i = parseInt(el.dataset.open, 10); const isOpen = !!el.parentElement.querySelector(".content"); S.jobOpen[i] = !isOpen; renderJob(); });
+  card.querySelectorAll("[data-d]").forEach((b) => b.onclick = async () => {
+    const note = $("jNote") ? $("jNote").value : "";
+    if (b.dataset.d === "redo" && !note.trim()) return toast("Write a note for Claude first", "error");
+    await act(post(`/api/jobs/${j.id}/decide`, { decision: b.dataset.d, note }), "Decision sent"); setTimeout(loadJob, 400);
+  });
+  card.querySelectorAll("[data-j]").forEach((b) => b.onclick = async () => {
+    const a = b.dataset.j;
+    if (a === "cancel" && !confirm("Cancel this job? Running Claude requests and runs are stopped.")) return;
+    if (a === "delete" && !confirm("Delete this job and its files?")) return;
+    if (a === "cancel") await act(post(`/api/jobs/${j.id}/decide`, { decision: "cancel" }), "Cancelling");
+    if (a === "retry") await act(post(`/api/jobs/${j.id}/retry`), "Retrying");
+    if (a === "delete") { await act(post(`/api/jobs/${j.id}/delete`), "Deleted"); S.jobId = null; S.job = null; $("jobDetail").innerHTML = '<div class="empty">Select a job.</div>'; location.hash = "jobs"; }
+    loadJobs();
+  });
+  card.querySelectorAll("[data-prompt]").forEach((b) => b.onclick = () => editStepPrompt(j, parseInt(b.dataset.prompt, 10)));
+  card.querySelectorAll("[data-rerun]").forEach((b) => b.onclick = async () => { if (!confirm("Run this step (and the following ones) again?")) return; await act(post(`/api/jobs/${j.id}/steps/${b.dataset.rerun}/rerun`, {}), "Step restarted"); setTimeout(loadJob, 400); });
+}
+async function editStepPrompt(job, index) {
+  const p = await act(api(`/api/jobs/${job.id}/steps/${index}/prompt`));
+  if (!p) return;
+  openModal(`<header><h2>Prompt · ${esc(job.steps[index].title)}</h2><button class="btn sm ghost right" data-close>${icon("x")}</button></header>
+    <div class="body"><label class="field">Instruction for this step ${p.custom ? "(custom)" : "(default)"}<textarea id="pText" rows="8" dir="auto" ${p.editable ? "" : "readonly"}>${esc(p.custom || p.default)}</textarea></label>
+      ${p.sent ? `<details style="margin-top:10px"><summary class="small" style="cursor:pointer;font-weight:600">Full prompt sent last time</summary><pre class="console" dir="auto" style="margin-top:6px">${esc(p.sent)}</pre></details>` : ""}</div>
+    <footer>${p.custom ? '<button class="btn" id="pReset">Back to default</button>' : ""}<button class="btn" data-close>Close</button>${p.editable ? '<button class="btn primary" id="pSave">Save</button>' : ""}</footer>`, (modal) => {
+    modal.querySelectorAll("[data-close]").forEach((b) => b.onclick = closeModal);
+    if ($("pSave")) $("pSave").onclick = async () => { await act(post(`/api/jobs/${job.id}/steps/${index}/prompt`, { prompt: $("pText").value === p.default ? "" : $("pText").value }), "Prompt saved"); closeModal(); };
+    if ($("pReset")) $("pReset").onclick = async () => { await act(post(`/api/jobs/${job.id}/steps/${index}/prompt`, { prompt: "" }), "Default restored"); closeModal(); };
+  });
+}
+async function pollJobs() {
+  if (!S.jobs) return;
+  const busy = S.jobs.jobs.some((j) => j.status === "running" || j.status === "waiting");
+  if (busy) { const data = await api("/api/jobs").catch(() => null); if (data) { S.jobs.jobs = data.jobs; renderJobList(); } }
+  if (S.jobId && (busy || !S.job)) loadJob();
+}
+
+/* ============================================================== systems */
+async function loadSystems() {
+  const data = await api("/api/config").catch((e) => ({ error: e.message }));
+  if (data.error) { $("systemsBody").innerHTML = `<div class="empty">${esc(data.error)}</div>`; return; }
+  S.config = data;
+  if (!S.sysTab || !data.systems.find((s) => s.key === S.sysTab)) S.sysTab = data.systems[0].key;
+  $("sysTabs").innerHTML = data.systems.map((s) => `<button data-k="${attr(s.key)}" class="${s.key === S.sysTab ? "on" : ""}">${esc(s.title)}${s.customised ? " •" : ""}</button>`).join("");
+  $("sysTabs").querySelectorAll("button").forEach((b) => b.onclick = () => { S.sysTab = b.dataset.k; loadSystems(); });
+  $("sysStore").textContent = `Saved in ${data.store.detail}. ${data.note}`;
+  const sys = data.systems.find((s) => s.key === S.sysTab);
+  S.sysDraft = { ...JSON.parse(JSON.stringify(sys.spec)), modules: JSON.parse(JSON.stringify(sys.modules)) };
+  renderSystemEditor(sys);
+}
+function rowsEditor(key, rows, columns, title, hint) {
+  return `<div class="card" style="margin-bottom:16px"><header><h2>${esc(title)}</h2><span class="muted small">${esc(hint || "")}</span><button class="btn xs right" data-add="${key}">+ Add</button></header>
+    <div class="body tight scroll"><table class="t"><thead><tr>${columns.map((c) => `<th>${esc(c.label)}</th>`).join("")}<th></th></tr></thead><tbody>${rows.map((row, i) => `<tr>${columns.map((c) => `<td>${
+      c.type === "check" ? `<input type="checkbox" data-e="${key}|${i}|${c.key}" ${row[c.key] ? "checked" : ""}>` :
+      c.type === "select" ? `<select data-e="${key}|${i}|${c.key}">${c.options.map((o) => `<option ${row[c.key] === o ? "selected" : ""}>${o}</option>`).join("")}</select>` :
+      `<input type="text" data-e="${key}|${i}|${c.key}" value="${attr(c.list ? (row[c.key] || []).join(", ") : row[c.key] ?? "")}" ${c.disabled && c.disabled(row) ? "disabled" : ""} placeholder="${attr(c.placeholder || "")}" ${c.mono ? 'class="mono"' : ""}>`}</td>`).join("")}
+      <td><button class="btn xs ghost danger" data-rm="${key}|${i}">${icon("x")}</button></td></tr>`).join("") || `<tr><td colspan="${columns.length + 1}" class="muted">None.</td></tr>`}</tbody></table></div></div>`;
+}
+const EDITORS = {
+  urls: { title: "URL fields", hint: "each becomes -D properties of a run", blank: { label: "", targets: [], requireHttps: false },
+    columns: [{ key: "label", label: "Label" }, { key: "targets", label: "-D properties (comma)", list: true, mono: true }, { key: "requireHttps", label: "HTTPS only", type: "check" }] },
+  logins: { title: "Login fields", hint: "environment variables of the test JVM; secret defaults are never stored", blank: { label: "", env: "", default: "", secret: false },
+    columns: [{ key: "label", label: "Label" }, { key: "env", label: "Environment variable", mono: true }, { key: "default", label: "Default (non-secret)", disabled: (r) => r.secret }, { key: "secret", label: "Secret", type: "check" }] },
+  serialGroups: { title: "Serial groups", hint: "classes matching a fragment share one thread when running in parallel", blank: { name: "", match: [] },
+    columns: [{ key: "name", label: "Name" }, { key: "match", label: "Class-name fragments (comma)", list: true, mono: true }] },
+  testTypes: { title: "Test types", hint: "TestNG groups offered as a run filter", blank: { group: "", label: "" },
+    columns: [{ key: "group", label: "TestNG group", mono: true }, { key: "label", label: "Label" }] },
+  modules: { title: "Module map", hint: "dashboard module coverage; classes are simple class names", blank: { name: "", status: "covered", classes: [], note: "" },
+    columns: [{ key: "name", label: "Module" }, { key: "status", label: "Status", type: "select", options: ["covered", "partial", "none", "out"] }, { key: "classes", label: "Classes (comma)", list: true, mono: true }, { key: "note", label: "Note" }] },
+};
+function renderSystemEditor(sys) {
+  const d = S.sysDraft;
+  const envNames = Object.keys(d.envs);
+  $("systemsBody").innerHTML = `
+    <div class="card" style="margin-bottom:16px"><header><h2>${esc(sys.title)}</h2><span class="muted small">-Dactive.system=${esc(d.activeSystem)}</span>
+      <div class="row right"><button class="btn sm" id="sysReset" ${sys.customised ? "" : "disabled"}>Reset to seed files</button><button class="btn sm primary" id="sysSave">Save</button></div></header>
+      <div class="body"><div class="row">
+        <label class="field">Bug ID prefix<input type="text" id="eBug" value="${attr(d.bugPrefix || "")}" style="width:110px" class="mono"></label>
+        <label class="field">Max parallel classes<select id="eThreads" ${d.serialOnly ? "disabled" : ""}>${[1, 2, 3, 4].map((n) => `<option ${n === d.maxThreads ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+        <label class="field grow">Parallel note<input type="text" id="eNote" value="${attr(d.parallelNote || "")}"></label></div>
+        ${d.serialOnly ? '<div class="muted small" style="margin-top:6px">This system runs serially (AGENTS.md: shared account, data cleaned by name prefix).</div>' : ""}</div></div>
+    ${rowsEditor("urls", d.urls, EDITORS.urls.columns, EDITORS.urls.title, EDITORS.urls.hint)}
+    <div class="card" style="margin-bottom:16px"><header><h2>Environments</h2><span class="muted small">URL values per environment (the first one is the default and is uptime-monitored)</span><button class="btn xs right" id="envAdd">+ Add</button></header>
+      <div class="body tight scroll"><table class="t"><thead><tr><th>Name</th>${d.urls.map((u) => `<th>${esc(u.label)}</th>`).join("")}<th></th></tr></thead><tbody>${envNames.map((name) => `<tr><td><input type="text" data-envname="${attr(name)}" value="${attr(name)}" class="mono" style="width:120px"></td>
+        ${d.urls.map((u) => `<td><input type="text" data-envurl="${attr(name)}|${attr(u.label)}" value="${attr((d.envs[name] || {})[u.label] || "")}" class="mono" placeholder="https://…"></td>`).join("")}<td><button class="btn xs ghost danger" data-envrm="${attr(name)}">${icon("x")}</button></td></tr>`).join("")}</tbody></table></div></div>
+    ${rowsEditor("logins", d.logins, EDITORS.logins.columns, EDITORS.logins.title, EDITORS.logins.hint)}
+    ${rowsEditor("serialGroups", d.serialGroups || [], EDITORS.serialGroups.columns, EDITORS.serialGroups.title, EDITORS.serialGroups.hint)}
+    ${rowsEditor("testTypes", d.testTypes || [], EDITORS.testTypes.columns, EDITORS.testTypes.title, EDITORS.testTypes.hint)}
+    ${rowsEditor("modules", d.modules || [], EDITORS.modules.columns, EDITORS.modules.title, EDITORS.modules.hint + ` · known: ${sys.classes.length} classes`)}`;
+  const body = $("systemsBody");
+  body.querySelectorAll("[data-e]").forEach((el) => el.addEventListener(el.type === "checkbox" || el.tagName === "SELECT" ? "change" : "input", () => {
+    const [key, i, field] = el.dataset.e.split("|"); const col = EDITORS[key].columns.find((c) => c.key === field);
+    const rows = key === "modules" ? d.modules : d[key];
+    rows[parseInt(i, 10)][field] = el.type === "checkbox" ? el.checked : col.list ? el.value.split(",").map((x) => x.trim()).filter(Boolean) : el.value;
+    if (key === "logins" && field === "secret") renderSystemEditor(sys);
+  }));
+  body.querySelectorAll("[data-add]").forEach((b) => b.onclick = () => { const key = b.dataset.add; (key === "modules" ? d.modules : (d[key] = d[key] || [])).push(JSON.parse(JSON.stringify(EDITORS[key].blank))); renderSystemEditor(sys); });
+  body.querySelectorAll("[data-rm]").forEach((b) => b.onclick = () => { const [key, i] = b.dataset.rm.split("|"); (key === "modules" ? d.modules : d[key]).splice(parseInt(i, 10), 1); renderSystemEditor(sys); });
+  body.querySelectorAll("[data-envurl]").forEach((el) => el.oninput = () => { const [name, label] = el.dataset.envurl.split("|"); d.envs[name] = d.envs[name] || {}; d.envs[name][label] = el.value; });
+  body.querySelectorAll("[data-envname]").forEach((el) => el.onchange = () => {
+    const old = el.dataset.envname, name = el.value.trim(); if (!name || name === old) return;
+    const entries = Object.entries(d.envs).map(([k, v]) => [k === old ? name : k, v]); d.envs = Object.fromEntries(entries); renderSystemEditor(sys);
+  });
+  body.querySelectorAll("[data-envrm]").forEach((b) => b.onclick = () => { delete d.envs[b.dataset.envrm]; renderSystemEditor(sys); });
+  $("envAdd").onclick = () => { let n = 1; while (d.envs["env" + n]) n++; d.envs["env" + n] = {}; renderSystemEditor(sys); };
+  $("eBug").oninput = (e) => { d.bugPrefix = e.target.value.trim().toUpperCase(); };
+  $("eThreads").onchange = (e) => { d.maxThreads = parseInt(e.target.value, 10); };
+  $("eNote").oninput = (e) => { d.parallelNote = e.target.value; };
+  $("sysSave").onclick = async () => { const ok = await act(post("/api/config/" + sys.key, d), "System configuration saved"); if (ok) { await reloadCatalog(); loadSystems(); } };
+  $("sysReset").onclick = async () => { if (!confirm("Replace the saved configuration of this system with the seed files (environments.json / modules.json)?")) return; const ok = await act(post(`/api/config/${sys.key}/reset`), "Reset to seed"); if (ok) { await reloadCatalog(); loadSystems(); } };
+}
+
+/* ============================================================== boot */
+async function reloadCatalog() {
+  const cat = await api("/api/catalog");
+  S.catalog = cat; S.order = cat.systems.map((s) => s.key); S.systems = Object.fromEntries(cat.systems.map((s) => [s.key, s]));
+  if (!S.systems[S.system]) S.system = S.order[0];
+  $("brandSub").textContent = cat.systems.map((s) => s.title).join(" · ") + ` · ${cat.store ? cat.store.kind : ""}`;
+  renderRunForm();
+}
+let TICKS = 0, LAST_BUILD = null;
+async function tick() {
+  if (document.hidden) return;
+  TICKS++;
+  const active = S.runs.some((r) => ACTIVE.has(r.status));
+  if (active || TICKS % 3 === 0) await refreshRuns();
+  if (S.build && LAST_BUILD !== null && S.build.id !== LAST_BUILD && S.build.status === "ready") reloadCatalog().catch(() => {});
+  if (S.build) LAST_BUILD = S.build.id;
+  if (S.page === "runs" && S.detail && (ACTIVE.has(S.detail.status) || TICKS % 8 === 0)) refreshDetail();
+  if (S.page === "runs" && S.detailTab === "console" && S.detail && ACTIVE.has(S.detail.status)) pollConsole();
+  if (S.page === "claude") pollClaude();
+  if (S.page === "jobs") pollJobs();
+  if (S.page === "schedules" && TICKS % 15 === 0) loadSchedules();
+}
+async function boot() {
+  applyTheme(store("taf-theme") || "system");
+  renderNotify();
+  try { await reloadCatalog(); }
+  catch (e) { $("runFormBody").innerHTML = `<div class="empty">Cannot load the catalogue: ${esc(e.message)}</div>`; return; }
+  const saved = store("taf-system");
+  if (saved && S.systems[saved]) { S.system = saved; renderRunForm(); }
+  maybeLoadRetest();
+  await refreshRuns();
+  route();
+  setInterval(tick, 2000);
+}
+boot();
+</script>
+</body>
+</html>

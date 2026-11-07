@@ -1,0 +1,7 @@
+{
+  "admin": {
+    "description": "ZakaaDash account used by authenticated UI tests. Values are never stored here.",
+    "emailEnv": "ZAKAADASH_EMAIL",
+    "passwordEnv": "ZAKAADASH_PASSWORD"
+  }
+}

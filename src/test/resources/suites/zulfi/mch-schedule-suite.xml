@@ -1,0 +1,9 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- US-FAP-MCH — enable with -Dmch.schedule.phase=a|b|c -->
+<suite name="Match Schedule Browse" verbose="1" parallel="false">
+    <test name="MCH-SCHED Acceptance">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.matchschedule.MatchScheduleBrowseAcceptanceTest"/>
+        </classes>
+    </test>
+</suite>

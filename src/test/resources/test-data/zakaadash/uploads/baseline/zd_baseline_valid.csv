@@ -1,0 +1,21 @@
+record_id,customer_name,city,order_date,category,quantity,unit_price,total_amount,is_active
+ZD-001,Ahmed Hassan,Riyadh,2024-03-01,Electronics,2,150.00,300.00,true
+ZD-002,Sara Ali,Jeddah,2024-03-02,Furniture,1,820.50,820.50,true
+ZD-003,Omar Farid,Dammam,2024-03-03,Grocery,5,12.40,62.00,true
+ZD-004,Layla Nasser,Khobar,2024-03-04,Electronics,1,499.99,499.99,false
+ZD-005,Yousef Kareem,Medina,2024-03-05,Clothing,3,75.00,225.00,true
+ZD-006,Maha Salem,Tabuk,2024-03-06,Grocery,8,9.75,78.00,true
+ZD-007,Khalid Anwar,Abha,2024-03-07,Electronics,1,1200.00,1200.00,true
+ZD-008,Noura Fahad,Taif,2024-03-08,Furniture,2,310.25,620.50,true
+ZD-009,Rami Zaid,Buraidah,2024-03-09,Clothing,4,55.00,220.00,false
+ZD-010,Hana Tariq,Hail,2024-03-10,Grocery,6,14.20,85.20,true
+ZD-011,Faisal Majed,Najran,2024-03-11,Electronics,3,89.99,269.97,true
+ZD-012,Reem Saad,Al Ahsa,2024-03-12,Furniture,1,450.00,450.00,true
+ZD-013,Tariq Basem,Yanbu,2024-03-13,Clothing,2,120.00,240.00,true
+ZD-014,Dina Waleed,Qatif,2024-03-14,Grocery,10,6.50,65.00,true
+ZD-015,Sami Hadi,Jubail,2024-03-15,Electronics,2,340.00,680.00,true
+ZD-016,Lina Hamad,Mecca,2024-03-16,Furniture,1,990.00,990.00,true
+ZD-017,Badr Nabil,Al Kharj,2024-03-17,Clothing,5,44.00,220.00,true
+ZD-018,Amal Rashid,Unaizah,2024-03-18,Grocery,7,11.30,79.10,true
+ZD-019,Ibrahim Qasim,Arar,2024-03-19,Electronics,1,760.00,760.00,false
+ZD-020,Mona Adel,Sakaka,2024-03-20,Furniture,3,180.00,540.00,true

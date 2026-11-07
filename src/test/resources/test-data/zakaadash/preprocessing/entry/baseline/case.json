@@ -1,0 +1,9 @@
+{
+  "testCaseId": "PP-BASELINE",
+  "title": "Baseline source for Preprocessing entry and wizard navigation tests",
+  "dataset": "input.csv",
+  "sourceNamePrefix": "AUTO_PP_BASELINE",
+  "category": "",
+  "settings": {},
+  "expected": {}
+}

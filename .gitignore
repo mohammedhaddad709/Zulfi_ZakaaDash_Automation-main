@@ -1,0 +1,37 @@
+# Build and run output
+target/
+runner/runs/
+runner/.build/
+runner/.runner.lock
+runner/runner.pid
+runner/.tmp/
+runner/.archive-cache.json
+runner/.archive-cache.tmp
+# Runner results/state (FileStore): defect registry, schedules, Systems-page edits, quarantine, uptime, Claude, jobs
+runner/bugs.json
+runner/schedules.json
+runner/config-store.json
+runner/quarantine.json
+runner/uptime.jsonl
+runner/agent/
+runner/jobs/
+runner/*.tmp
+test-execution-reports/
+test-output/
+video/
+.staging/
+__pycache__/
+*.pyc
+
+# Bundled Allure CLI binary (40 MB) - install locally (scripts/install-allure-local.ps1) or set ALLURE_CLI
+tools/allure-*/
+
+# Local credentials / IDE
+.env
+*.local.properties
+.idea/
+.vscode/
+*.iml
+
+# Local credentials (never commit)
+config/credentials.local.properties

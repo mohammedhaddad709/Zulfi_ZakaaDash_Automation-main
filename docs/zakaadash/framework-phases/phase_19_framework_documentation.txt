@@ -1,0 +1,50 @@
+# Phase 19 — Framework Documentation
+
+Read and follow AGENTS.md strictly.
+
+Implement Phase 19 only: Framework Documentation.
+
+Goal:
+Document the full framework after implementation and discovery phases.
+
+Use:
+- Current project stack
+
+New technology to add:
+- None
+
+Scope:
+- README.md only
+
+Tasks:
+1. Create or update README.md.
+2. Document framework overview.
+3. Document current stack.
+4. Document project structure.
+5. Document how to run tests.
+6. Document how to run grouped suites if implemented.
+7. Document how to run parallel suite if implemented.
+8. Document how to generate reports if reporting exists.
+9. Document configuration usage if config exists.
+10. Document browser management if implemented.
+11. Document wait strategy if implemented.
+12. Document test data strategy if implemented.
+13. Document discovery documentation if implemented.
+14. Document Page Object and flow structure.
+15. Document current limitations.
+16. Document future enhancements.
+
+Acceptance criteria:
+- README.md is clear.
+- README explains the framework simply.
+- README includes run/validation commands.
+- README does not claim unsupported features.
+- README reflects the actual implemented project.
+
+Run/validation command:
+- Review README.md
+
+Important:
+Do not add code.
+Do not refactor.
+Do not add dependencies.

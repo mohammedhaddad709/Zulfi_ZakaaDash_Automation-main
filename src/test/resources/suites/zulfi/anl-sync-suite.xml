@@ -1,0 +1,9 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- US-FAP-ANL-SYNC — enable with -Danl.sync.phase=a|b|c|d (default: all skipped) -->
+<suite name="Match Schedule Analysis Status Sync" verbose="1" parallel="false">
+    <test name="ANL-SYNC Acceptance">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.matchschedule.AnalysisStatusSyncAcceptanceTest"/>
+        </classes>
+    </test>
+</suite>

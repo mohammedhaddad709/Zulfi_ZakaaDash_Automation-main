@@ -1,0 +1,13 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Login Regression" verbose="1" parallel="false">
+    <test name="Login Happy Path">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.login.LoginHappyPathTest"/>
+        </classes>
+    </test>
+    <test name="Login Regression Batch 1">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.login.LoginRegressionTest"/>
+        </classes>
+    </test>
+</suite>

@@ -1,0 +1,48 @@
+# Phase 7 — Test Grouping Strategy
+
+Read and follow AGENTS.md strictly.
+
+Implement Phase 7 only: Test Grouping Strategy.
+
+Goal:
+Organize tests into clear execution groups such as smoke, and regression.
+
+Use:
+- Current project stack
+- TestNG groups
+- TestNG XML
+- Maven Surefire Plugin
+
+New technology to add:
+- None
+
+Scope:
+- Existing test classes
+- TestNG XML files
+- pom.xml if Maven profile configuration is needed
+
+Tasks:
+1. Add TestNG groups to existing tests.
+2. Use clear group names:
+   - smoke
+   - regression
+3. Create separate TestNG XML files if useful:
+   - testng-smoke.xml
+   - testng-regression.xml
+4. Configure Maven execution so selected suites can run clearly.
+5. Add simple run commands as comments or documentation if needed.
+
+Acceptance criteria:
+- Smoke suite can run independently.
+- Sanity suite can run independently.
+- Regression suite can run independently.
+- Existing login test belongs to the correct group.
+- mvn clean test runs successfully.
+
+Run/validation command:
+- mvn clean test
+
+Important:
+Do not add parallel execution in this phase.
+Do not add new dependencies.
+Do not create unnecessary suites.

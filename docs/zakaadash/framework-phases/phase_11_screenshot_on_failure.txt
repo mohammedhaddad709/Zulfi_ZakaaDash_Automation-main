@@ -1,0 +1,43 @@
+# Phase 11 — Screenshot on Failure
+
+Read and follow AGENTS.md strictly.
+
+Implement Phase 11 only: Screenshot on Failure.
+
+Goal:
+Attach screenshot to Allure only when a test fails.
+
+Use:
+- Current project stack
+- Selenium TakesScreenshot
+- TestNG ITestListener
+- Allure attachment
+
+New technology to add:
+- None
+
+Scope:
+- Screenshot utility
+- Test listener
+- testng.xml
+
+Tasks:
+1. Create ScreenshotUtil.
+2. Create TestListener.
+3. Capture screenshot on test failure.
+4. Attach screenshot to Allure.
+5. Register listener in testng.xml.
+6. Keep original test failure visible.
+
+Acceptance criteria:
+- Failed test attaches screenshot to Allure.
+- Passing tests do not attach screenshots.
+- mvn clean test runs after validation.
+- No retry logic is added.
+
+Run/validation command:
+- mvn clean test
+
+Important:
+Do not suppress failures.
+Do not save screenshots to disk unless needed.

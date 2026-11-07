@@ -1,0 +1,102 @@
+{
+  "synthetic": true,
+  "test_case_id": "E2E-PP-FOOTBALL-001",
+  "raw_rows": 66,
+  "expected_rows": 60,
+  "columns": 28,
+  "expected_duplicate_rows_removed": 6,
+  "duplicated_record_ids": [
+    "F002",
+    "F012",
+    "F022",
+    "F032",
+    "F042",
+    "F052"
+  ],
+  "missing_cells": [
+    {
+      "record_id": "F003",
+      "column": "sponsorship_bonus_eur",
+      "expected_value": 0,
+      "rule": "constant 0; this fixture explicitly models no bonus payment"
+    },
+    {
+      "record_id": "F013",
+      "column": "sponsorship_bonus_eur",
+      "expected_value": 0,
+      "rule": "constant 0; this fixture explicitly models no bonus payment"
+    },
+    {
+      "record_id": "F023",
+      "column": "sponsorship_bonus_eur",
+      "expected_value": 0,
+      "rule": "constant 0; this fixture explicitly models no bonus payment"
+    },
+    {
+      "record_id": "F033",
+      "column": "sponsorship_bonus_eur",
+      "expected_value": 0,
+      "rule": "constant 0; this fixture explicitly models no bonus payment"
+    },
+    {
+      "record_id": "F043",
+      "column": "sponsorship_bonus_eur",
+      "expected_value": 0,
+      "rule": "constant 0; this fixture explicitly models no bonus payment"
+    },
+    {
+      "record_id": "F053",
+      "column": "sponsorship_bonus_eur",
+      "expected_value": 0,
+      "rule": "constant 0; this fixture explicitly models no bonus payment"
+    },
+    {
+      "record_id": "F001",
+      "column": "average_attendance",
+      "expected_value": 25000,
+      "rule": "constant 25000; known test fixture value, not a production inference"
+    },
+    {
+      "record_id": "F016",
+      "column": "average_attendance",
+      "expected_value": 25000,
+      "rule": "constant 25000; known test fixture value, not a production inference"
+    },
+    {
+      "record_id": "F031",
+      "column": "average_attendance",
+      "expected_value": 25000,
+      "rule": "constant 25000; known test fixture value, not a production inference"
+    },
+    {
+      "record_id": "F046",
+      "column": "average_attendance",
+      "expected_value": 25000,
+      "rule": "constant 25000; known test fixture value, not a production inference"
+    }
+  ],
+  "expected_null_cells": 0,
+  "business_key": [
+    "team_id",
+    "season"
+  ],
+  "comparison_key": "record_id",
+  "league_count": 5,
+  "team_count": 20,
+  "season_count": 3,
+  "roi_formula": "100 * (total_revenue_eur - total_cost_eur) / total_cost_eur",
+  "roi_units": "percentage points, e.g. 12.5 means 12.5%, not 0.125",
+  "numeric_tolerance": {
+    "money_eur": 0.01,
+    "roi_pct": 1e-05
+  },
+  "totals": {
+    "total_revenue_eur": 5986000000,
+    "total_cost_eur": 5100000000,
+    "net_return_eur": 886000000,
+    "points": 3150
+  },
+  "weighted_roi_pct": 17.372549019607842,
+  "raw_sha256": "f5fd77296143b9620ba1867b133d340cce7929ca6a531a965c3c8e65f1130d94",
+  "expected_sha256": "ef90a82d39dfe128028ab2295b33fa91396f086caaaa1122af4872d2f7a62d13"
+}

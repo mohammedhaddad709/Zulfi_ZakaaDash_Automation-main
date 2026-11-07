@@ -1,0 +1,9 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- ZakaaDash suites stay serial: flows share one authenticated account and E2E is stateful. -->
+<suite name="Framework Parallel (non-ZakaaDash)" verbose="1" parallel="methods" thread-count="2">
+    <test name="Heroku Parallel Check">
+        <classes>
+            <class name="com.taf.systems.zakaadash.tests.heroku.HerokuLoginTest"/>
+        </classes>
+    </test>
+</suite>

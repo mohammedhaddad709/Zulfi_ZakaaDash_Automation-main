@@ -1,0 +1,37 @@
+# Phase 8 — AssertJ Assertions
+
+Read and follow AGENTS.md strictly.
+
+Implement Phase 8 only: AssertJ Assertions.
+
+Goal:
+Introduce readable assertions using AssertJ.
+
+Use:
+- Current project stack
+- AssertJ
+
+New technology to add:
+- AssertJ
+
+Scope:
+- pom.xml
+- Login test assertions only
+
+Tasks:
+1. Add AssertJ dependency.
+2. Keep TestNG assertion if useful.
+3. Add one clear AssertJ assertion.
+4. Keep the test readable.
+
+Acceptance criteria:
+- AssertJ is used in the login test.
+- Test still passes.
+- mvn clean test runs successfully.
+
+Run/validation command:
+- mvn clean test
+
+Important:
+Do not create custom assertion utilities.
+Do not replace everything unnecessarily.

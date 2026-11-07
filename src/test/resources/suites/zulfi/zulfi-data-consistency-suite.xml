@@ -1,0 +1,9 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- US-FAP-ZULFI-DATA — cross-page E2E; enable with -Dclub.data.phase=b (read-only) -->
+<suite name="Zulfi Club Data Consistency (E2E)" verbose="1" parallel="false">
+    <test name="ZDC E2E">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.clubdata.ZulfiDataConsistencyE2ETest"/>
+        </classes>
+    </test>
+</suite>

@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Portal Unit Tests" verbose="1" parallel="false">
+    <test name="Validations and contracts">
+        <classes>
+            <class name="com.taf.systems.zulfi.validations.DuplicateFixtureToastRulesTest"/>
+            <class name="com.taf.systems.zulfi.validations.TeamFieldDisplayRulesTest"/>
+            <class name="com.taf.systems.zulfi.config.MatchScheduleAnalysisGateContractTest"/>
+            <class name="com.taf.systems.zulfi.reporting.DefectReportingContractTest"/>
+            <class name="com.taf.systems.zulfi.clubdata.ClubDataRulesTest"/>
+            <class name="com.taf.systems.zulfi.validations.MatchScheduleRowRulesTest"/>
+            <class name="com.taf.systems.zulfi.config.PhaseGatesContractTest"/>
+        </classes>
+    </test>
+</suite>

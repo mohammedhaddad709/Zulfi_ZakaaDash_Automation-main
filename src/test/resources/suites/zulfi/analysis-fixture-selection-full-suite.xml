@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- Optional exhaustive regression — all discovered indexes in one JVM after discovery. -->
+<suite name="Official Fixture Selection Full" verbose="1" parallel="false">
+    <test name="Fixture Discovery">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.analysis.OfficialFixtureDiscoveryTest"/>
+        </classes>
+    </test>
+    <test name="Indexed Fixture Selection Exhaustive">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.analysis.OfficialFixtureSelectionTest"/>
+        </classes>
+    </test>
+</suite>

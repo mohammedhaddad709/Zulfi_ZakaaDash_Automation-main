@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Official Match Analysis Happy Path" verbose="1" parallel="false">
+    <test name="ANL-OFF-HP-001">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.analysis.OfficialMatchAnalysisHappyPathTest"/>
+        </classes>
+    </test>
+</suite>

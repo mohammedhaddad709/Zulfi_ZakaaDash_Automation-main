@@ -1,0 +1,9 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- US-FAP-CLUBS — enable with -Dclubs.yellow.phase=a|b|c -->
+<suite name="Yellow League Clubs Browse" verbose="1" parallel="false">
+    <test name="CLUB Acceptance">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.clubs.ClubsBrowseAcceptanceTest"/>
+        </classes>
+    </test>
+</suite>

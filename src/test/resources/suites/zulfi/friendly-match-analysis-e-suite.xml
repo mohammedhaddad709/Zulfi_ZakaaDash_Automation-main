@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- Phase e schedule-guard tests (011/014): discovery baseline + friendly acceptance -->
+<suite name="Friendly Match Analysis (phase e + manifest)" verbose="1" parallel="false">
+    <test name="Fixture Discovery">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.analysis.OfficialFixtureDiscoveryTest"/>
+        </classes>
+    </test>
+    <test name="ANL-FRD Acceptance">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.analysis.friendly.FriendlyMatchAcceptanceTest"/>
+        </classes>
+    </test>
+</suite>

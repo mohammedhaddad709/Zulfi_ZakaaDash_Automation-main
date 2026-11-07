@@ -1,0 +1,35 @@
+# docker compose -f runner/docker-compose.yml up -d --build      (from the project root)
+# RUNNER_PASSWORD is required: the container listens on all interfaces.
+services:
+  runner:
+    build:
+      context: ..
+      dockerfile: runner/Dockerfile
+    image: automation-control-center:latest
+    restart: unless-stopped
+    ports:
+      - "${RUNNER_PORT:-8080}:8080"
+    env_file:
+      - path: ./.env
+        required: false
+    environment:
+      RUNNER_USER: ${RUNNER_USER:-admin}
+      RUNNER_PASSWORD: ${RUNNER_PASSWORD:?Set RUNNER_PASSWORD (basic auth for the runner)}
+      RUNNER_MAX_PARALLEL: ${RUNNER_MAX_PARALLEL:-4}
+      RUNNER_GITHUB_REPO: ${RUNNER_GITHUB_REPO:-}
+      RUNNER_GITHUB_BRANCH: ${RUNNER_GITHUB_BRANCH:-main}
+      RUNNER_GITHUB_TOKEN: ${RUNNER_GITHUB_TOKEN:-}
+      RUNNER_EXECUTION: LocalHeadless
+      RUNNER_DATA_DIR: /data             # runs, reports, defect registry, schedules, quarantine, uptime, Claude, jobs
+    shm_size: 2gb                      # Chrome needs a large /dev/shm
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # reach a MySQL running on the Docker host
+    volumes:
+      - runner-runs:/data                    # run history (FileStore) + reports + runner state
+      - maven-repo:/root/.m2                 # Maven cache
+      - claude-home:/root/.claude            # Claude Code sign-in
+
+volumes:
+  runner-runs:
+  maven-repo:
+  claude-home:

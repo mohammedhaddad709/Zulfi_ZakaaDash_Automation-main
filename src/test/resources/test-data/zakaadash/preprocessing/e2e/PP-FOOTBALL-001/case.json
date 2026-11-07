@@ -1,0 +1,26 @@
+{
+  "testCaseId": "E2E-PP-FOOTBALL-001",
+  "title": "Football ROI advanced preprocessing with explicit cleaning rules",
+  "dataset": "input.csv",
+  "sourceNamePrefix": "AUTO_PP_FOOTBALL_SRC",
+  "category": "football-roi",
+  "settings": {
+    "removeExactDuplicateRows": true,
+    "fillConstants": [
+      { "column": "sponsorship_bonus_eur", "value": 0 },
+      { "column": "average_attendance", "value": 25000 }
+    ],
+    "disableOutlierRemoval": true,
+    "disableEncoding": true,
+    "disableNormalization": true,
+    "disableBinning": true,
+    "disableTextStandardization": true,
+    "disableExtraImputation": true
+  },
+  "expected": {
+    "processedCopyPrefix": "AUTO_PP_FOOTBALL_RESULT",
+    "expectedResultsResource": "test-data/zakaadash/expected/football/expected_results.json",
+    "goldenCsvResource": "test-data/zakaadash/expected/football/zd_football_roi_expected_clean.csv",
+    "rawUploadResource": "test-data/zakaadash/uploads/football/zd_football_roi_raw.csv"
+  }
+}

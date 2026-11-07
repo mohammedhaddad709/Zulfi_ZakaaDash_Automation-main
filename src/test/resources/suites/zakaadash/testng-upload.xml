@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="ZakaaDash - Upload Data" verbose="1">
+    <test name="Upload Data Feature">
+        <packages>
+            <package name="com.taf.systems.zakaadash.tests.upload"/>
+        </packages>
+    </test>
+</suite>

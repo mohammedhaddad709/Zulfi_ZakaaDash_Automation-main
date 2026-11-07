@@ -1,0 +1,41 @@
+# Phase 5 — Wait Strategy
+
+Read and follow AGENTS.md strictly.
+
+Implement Phase 5 only: Wait Strategy.
+
+Goal:
+Centralize synchronization using WebDriverWait.
+
+Use:
+- Current project stack
+- WebDriverWait
+- ExpectedConditions
+
+New technology to add:
+- None
+
+Scope:
+- Wait utility
+- BasePage/page action methods
+
+Tasks:
+1. Create WaitUtil.
+2. Add waitForVisible.
+3. Add waitForClickable.
+4. Add waitForPresence.
+5. Read explicit wait timeout from config if available.
+6. Update BasePage to use WaitUtil.
+
+Acceptance criteria:
+- Page actions use explicit waits.
+- No Thread.sleep() is used.
+- Login test still passes.
+- mvn clean test runs successfully.
+
+Run/validation command:
+- mvn clean test
+
+Important:
+Do not add advanced retry logic.
+Do not hide timeout failures silently.

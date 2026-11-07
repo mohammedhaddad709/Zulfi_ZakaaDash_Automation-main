@@ -1,0 +1,54 @@
+# Phase 15 — Application Discovery and Export
+
+Read and follow AGENTS.md strictly.
+
+Implement Phase 15 only: Application Discovery and Export.
+
+Goal:
+Analyze the provided website and export pages, locators, epics, features, workflows, and candidate tests.
+
+Use:
+- Current project stack
+- Documentation-based discovery
+
+New technology to add:
+- None
+
+Scope:
+- docs/discovery only
+
+Input:
+- Website URL will be provided
+- Credentials may be provided if needed
+
+Tasks:
+1. Inspect the website.
+2. Identify pages/screens.
+3. Identify key workflows.
+4. Identify epics/features.
+5. Identify important elements and locators.
+6. Rate locator stability.
+7. Recommend missing testability attributes.
+8. Create discovery documentation.
+
+Required files:
+- docs/discovery/application-map.md
+- docs/discovery/locator-catalog.md
+- docs/discovery/workflow-catalog.md
+- docs/discovery/epic-feature-map.md
+- docs/discovery/candidate-test-scenarios.md
+- docs/discovery/page-object-recommendations.md
+- docs/discovery/testability-recommendations.md
+
+Acceptance criteria:
+- Discovery docs are created.
+- No framework code is changed.
+- No tests are created.
+- Weak locators are marked clearly.
+
+Run/validation command:
+- Review generated docs
+
+Important:
+Do not store real credentials.
+Do not generate automation code in this phase.

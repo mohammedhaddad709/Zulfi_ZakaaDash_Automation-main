@@ -1,0 +1,45 @@
+# Phase 9 — Logging
+
+Read and follow AGENTS.md strictly.
+
+Implement Phase 9 only: Logging.
+
+Goal:
+Add simple useful logging.
+
+Use:
+- Current project stack
+- SLF4J
+- Logback
+- Lombok @Slf4j
+
+New technology to add:
+- SLF4J
+- Logback
+- Lombok
+
+Scope:
+- pom.xml
+- logback.xml
+- Core framework classes only
+
+Tasks:
+1. Add SLF4J.
+2. Add Logback.
+3. Add Lombok.
+4. Configure Lombok annotation processing if needed.
+5. Create logback.xml.
+6. Use @Slf4j in DriverFactory, DriverManager, and BaseTest if useful.
+7. Log browser setup and teardown only.
+
+Acceptance criteria:
+- Logs appear during test execution.
+- No sensitive data is logged.
+- mvn clean test runs successfully.
+
+Run/validation command:
+- mvn clean test
+
+Important:
+Use Lombok only for @Slf4j.
+Do not over-log.

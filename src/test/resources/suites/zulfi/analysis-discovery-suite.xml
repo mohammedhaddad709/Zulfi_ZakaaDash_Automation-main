@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Official Fixture Discovery" verbose="1" parallel="false">
+    <test name="ANL-OFF-DIS-001">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.analysis.OfficialFixtureDiscoveryTest"/>
+        </classes>
+    </test>
+</suite>

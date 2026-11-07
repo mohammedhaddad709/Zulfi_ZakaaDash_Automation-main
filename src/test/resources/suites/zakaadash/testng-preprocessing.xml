@@ -1,0 +1,13 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="ZakaaDash - Preprocessing" verbose="1">
+    <test name="Preprocessing Feature">
+        <groups>
+            <run>
+                <include name="feature-preprocessing"/>
+            </run>
+        </groups>
+        <packages>
+            <package name="com.taf.systems.zakaadash.tests.preprocessing.*"/>
+        </packages>
+    </test>
+</suite>

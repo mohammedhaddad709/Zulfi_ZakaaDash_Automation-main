@@ -1,0 +1,39 @@
+# Phase 2 — Page Object Model Refactor
+
+Read and follow AGENTS.md strictly.
+
+Implement Phase 2 only: Page Object Model Refactor.
+
+Goal:
+Refactor the working Heroku login test into Page Object Model.
+
+Use:
+- Current project stack
+
+New technology to add:
+- None
+
+Scope:
+- Existing login test
+- Page classes only
+
+Tasks:
+1. Create BasePage.
+2. Create LoginPage.
+3. Move locators from the test into LoginPage.
+4. Move Selenium actions from the test into LoginPage or BasePage.
+5. Keep the test focused on test intent only.
+6. Keep browser creation as-is for now.
+
+Acceptance criteria:
+- Test no longer contains locators.
+- Test uses LoginPage.
+- Login still passes.
+- mvn clean test runs successfully.
+
+Run/validation command:
+- mvn clean test
+
+Important:
+Do not add new dependencies.
+Do not add driver management yet.

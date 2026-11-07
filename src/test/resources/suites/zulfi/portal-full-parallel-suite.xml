@@ -1,0 +1,34 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- Run: scripts/run-portal-full-parallel.ps1 (MCH-ANL submit chain: match-schedule-analysis-submit-suite.xml, explicit authorization only) -->
+<suite name="Portal Full Parallel" verbose="1" configfailurepolicy="continue">
+    <test name="Fixture discovery seed" parallel="none">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.analysis.OfficialFixtureDiscoveryTest"/>
+        </classes>
+    </test>
+    <test name="All portal test classes" parallel="classes" thread-count="4">
+        <classes>
+            <class name="com.taf.systems.zulfi.config.MatchScheduleAnalysisGateContractTest"/>
+            <class name="com.taf.systems.zulfi.features.analysis.OfficialFixturePreflightTest"/>
+            <class name="com.taf.systems.zulfi.features.analysis.OfficialFixtureSelectionTest"/>
+            <class name="com.taf.systems.zulfi.features.analysis.OfficialMatchAnalysisHappyPathTest"/>
+            <class name="com.taf.systems.zulfi.features.analysis.friendly.FriendlyMatchAcceptanceTest"/>
+            <class name="com.taf.systems.zulfi.features.analysis.listing.AnalysesListingAcceptanceTest"/>
+            <class name="com.taf.systems.zulfi.features.analysis.matchtype.MatchTypeOfficialAcceptanceTest"/>
+            <class name="com.taf.systems.zulfi.features.analysis.status.AnalysisProcessingStatusAcceptanceTest"/>
+            <class name="com.taf.systems.zulfi.features.clubinfo.ClubInformationAcceptanceTest"/>
+            <class name="com.taf.systems.zulfi.features.clubs.ClubsBrowseAcceptanceTest"/>
+            <class name="com.taf.systems.zulfi.features.home.HomeCurrentResultsAcceptanceTest"/>
+            <class name="com.taf.systems.zulfi.features.home.HomeOverviewAcceptanceTest"/>
+            <class name="com.taf.systems.zulfi.features.login.LoginHappyPathTest"/>
+            <class name="com.taf.systems.zulfi.features.login.LoginRegressionTest"/>
+            <class name="com.taf.systems.zulfi.features.matchschedule.AnalysisStatusSyncAcceptanceTest"/>
+            <class name="com.taf.systems.zulfi.features.matchschedule.MatchScheduleAnalysisAcceptanceTest"/>
+            <class name="com.taf.systems.zulfi.features.matchschedule.MatchScheduleBrowseAcceptanceTest"/>
+            <class name="com.taf.systems.zulfi.login.LoginRegressionSuiteGuardContractTest"/>
+            <class name="com.taf.systems.zulfi.reporting.DefectReportingContractTest"/>
+            <class name="com.taf.systems.zulfi.validations.DuplicateFixtureToastRulesTest"/>
+            <class name="com.taf.systems.zulfi.validations.TeamFieldDisplayRulesTest"/>
+        </classes>
+    </test>
+</suite>

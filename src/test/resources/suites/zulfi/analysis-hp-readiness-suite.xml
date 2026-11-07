@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- Non-mutating Happy Path through form readiness (steps 1-10); submit deferred without -Danalysis.create.enabled=true -->
+<suite name="Official Analysis HP Readiness" verbose="1" parallel="false">
+    <test name="Fixture Discovery">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.analysis.OfficialFixtureDiscoveryTest"/>
+        </classes>
+    </test>
+    <test name="ANL-OFF-HP-001 Readiness">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.analysis.OfficialMatchAnalysisHappyPathTest"/>
+        </classes>
+    </test>
+</suite>

@@ -1,0 +1,55 @@
+# Phase 14 — Parallel Execution Strategy
+
+Read and follow AGENTS.md strictly.
+
+Implement Phase 14 only: Parallel Execution Strategy.
+
+Goal:
+Enable safe parallel execution using TestNG while keeping WebDriver thread-safe.
+
+Use:
+- Current project stack
+- TestNG parallel execution
+- ThreadLocal WebDriver
+- Existing DriverManager
+- Existing DriverFactory
+- Existing TestNG XML suites
+- Existing data provider strategy if already implemented
+
+New technology to add:
+- None
+
+Scope:
+- TestNG XML files
+- DriverManager review
+- BaseTest setup/teardown review
+- DataProvider usage if already implemented
+
+Tasks:
+1. Review DriverManager and confirm WebDriver is stored in ThreadLocal.
+2. Confirm teardown always quits driver and removes ThreadLocal.
+3. Configure a dedicated parallel TestNG XML suite.
+4. Start with safe parallel mode:
+   - parallel="methods" or parallel="classes"
+   - small thread-count
+5. If DataProvider exists, document or configure how data-driven tests behave in parallel.
+6. If using @DataProvider(parallel = true), ensure it is intentional and safe.
+7. Run the suite and confirm browser sessions do not share drivers.
+8. Document recommended parallel execution rules.
+
+Acceptance criteria:
+- Parallel suite exists.
+- Tests can run in parallel safely.
+- Each test thread gets its own WebDriver instance.
+- Driver is removed after each test.
+- No shared static WebDriver exists.
+- mvn clean test runs or failures are clearly documented.
+
+Run/validation command:
+- mvn clean test
+
+Important:
+Do not add Selenium Grid.
+Do not add Docker.
+Do not increase thread-count aggressively.
+Do not enable DataProvider parallel execution unless it is safe and intentional.

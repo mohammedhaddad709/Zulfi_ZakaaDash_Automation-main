@@ -1,0 +1,41 @@
+# Phase 17 — Generate Business Flows from Discovery
+
+Read and follow AGENTS.md strictly.
+
+Implement Phase 17 only: Generate Business Flows from Discovery.
+
+Goal:
+Creat   e reusable business flows from discovered workflows.
+
+Use:
+- Current project stack
+- Existing Page Objects
+
+New technology to add:
+- None
+
+Scope:
+- Business flow classes only
+
+Input:
+- docs/discovery/workflow-catalog.md
+- Existing Page Objects
+
+Tasks:
+1. Identify reusable workflows.
+2. Create flow classes.
+3. Use Page Objects only.
+4. Keep flows business-readable.
+5. Avoid direct WebDriver usage.
+
+Acceptance criteria:
+- Flow classes compile.
+- Flows use Page Objects only.
+- mvn clean compile passes.
+
+Run/validation command:
+- mvn clean compile
+
+Important:
+Do not create tests in this phase.
+Do not add locators inside flows.

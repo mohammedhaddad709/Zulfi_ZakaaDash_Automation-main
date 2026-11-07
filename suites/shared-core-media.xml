@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- Shared-core evidence capture with a real Chromium browser on a local page (no network). Use -DexecutionType=LocalHeadless. -->
+<suite name="Shared core media" verbose="1" parallel="false">
+    <test name="Evidence capture">
+        <classes>
+            <class name="com.taf.core.BrowserVideoRecorderTest"/>
+        </classes>
+    </test>
+</suite>

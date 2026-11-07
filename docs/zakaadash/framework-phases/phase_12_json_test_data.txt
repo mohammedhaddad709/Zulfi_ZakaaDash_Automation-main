@@ -1,0 +1,41 @@
+# Phase 12 — JSON Test Data
+
+Read and follow AGENTS.md strictly.
+
+Implement Phase 12 only: JSON Test Data.
+
+Goal:
+Move controlled static test data into JSON.
+
+Use:
+- Current project stack
+- JSON file under test resources
+- Jackson
+
+New technology to add:
+- Jackson
+
+Scope:
+- pom.xml
+- src/test/resources
+- Test data helper/classes
+- Login test if needed
+
+Tasks:
+1. Add Jackson dependency.
+2. Create users.json under src/test/resources.
+3. Add valid Heroku login data.
+4. Create a minimal JSON reader or test data helper.
+5. Use JSON data in the login test.
+
+Acceptance criteria:
+- Login test reads data from JSON.
+- Test still passes.
+- mvn clean test runs successfully.
+
+Run/validation command:
+- mvn clean test
+
+Important:
+Do not create a complex data framework.
+Do not store real credentials.

@@ -1,0 +1,9 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- US-FAP-ANL-FRIENDLY — enable with -Danl.friendly.phase=a|b|c|d|e -->
+<suite name="Friendly Match Analysis" verbose="1" parallel="false">
+    <test name="ANL-FRD Acceptance">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.analysis.friendly.FriendlyMatchAcceptanceTest"/>
+        </classes>
+    </test>
+</suite>

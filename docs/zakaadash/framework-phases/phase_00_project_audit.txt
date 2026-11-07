@@ -1,0 +1,36 @@
+# Phase 0 — Project Audit
+
+Read and follow AGENTS.md strictly.
+
+Implement Phase 0 only: Project Audit.
+
+Goal:
+Inspect the current project before changing anything.
+
+Use:
+- Current project stack only
+
+New technology to add:
+- None
+
+Scope:
+- Project inspection only
+
+Tasks:
+1. Inspect the folder structure.
+2. Check existing dependencies and plugins.
+3. Check existing source and test folders.
+4. Identify reusable files.
+5. Identify risks before implementation.
+
+Acceptance criteria:
+- No files are changed.
+- Current project status is summarized.
+- Risks are listed.
+- Next step is recommended.
+
+Run/validation command:
+- No command required
+
+Important:
+Do not create, update, or delete any files.

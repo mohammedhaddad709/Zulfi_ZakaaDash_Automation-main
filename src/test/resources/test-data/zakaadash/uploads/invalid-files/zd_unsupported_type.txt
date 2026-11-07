@@ -1,0 +1,2 @@
+This plain-text file is not a supported dataset (CSV, Excel or JSON).
+Used by FILE-004 to check that unsupported upload types are rejected.

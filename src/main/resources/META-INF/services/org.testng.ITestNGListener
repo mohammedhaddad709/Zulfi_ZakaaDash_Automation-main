@@ -1,0 +1,3 @@
+com.taf.core.listeners.TestNGListeners
+com.taf.systems.zakaadash.reporting.TestListener
+com.taf.systems.zakaadash.reporting.QaSummaryListener

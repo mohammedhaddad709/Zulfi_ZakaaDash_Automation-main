@@ -1,0 +1,44 @@
+@# Phase 3 — Owner Configuration
+
+Read and follow AGENTS.md strictly.
+
+Implement Phase 3 only: Owner Configuration.
+
+Goal:
+Move hardcoded configuration values into Owner config.
+
+Use:
+- Current project stack
+- Owner Config
+
+New technology to add:
+- Owner
+
+Scope:
+- pom.xml
+- src/test/resources/config.properties
+- Config classes
+- Existing test/page usage where needed
+
+Tasks:
+1. Add Owner dependency.
+2. Create config.properties under src/test/resources.
+3. Add base.url.
+4. Add browser.
+5. Add explicit.wait if needed.
+6. Add page.load.timeout if needed.
+7. Create FrameworkConfig.
+8. Create ConfigManager.
+9. Replace hardcoded URL with config value.
+
+Acceptance criteria:
+- URL is read from config.properties.
+- Test still passes.
+- mvn clean test runs successfully.
+
+Run/validation command:
+- mvn clean test
+
+Important:
+Do not create a custom ConfigReader.
+Do not add unrelated configuration complexity.

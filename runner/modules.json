@@ -1,0 +1,34 @@
+{
+  "_comment": "Seed module map (spec 5.6): status covered | partial | none | out; classes are simple class names. Systems-page edits are stored by the runner store, never here.",
+  "systems": {
+    "zulfi": [
+      {"name": "Login", "status": "covered", "classes": ["LoginHappyPathTest", "LoginRegressionTest", "LoginRegressionSuiteGuardContractTest"]},
+      {"name": "Home overview & recent analyses", "status": "covered", "classes": ["HomeOverviewAcceptanceTest"]},
+      {"name": "Home current team results", "status": "covered", "classes": ["HomeCurrentResultsAcceptanceTest"]},
+      {"name": "Yellow League clubs", "status": "covered", "classes": ["ClubsBrowseAcceptanceTest"]},
+      {"name": "Club details page", "status": "covered", "classes": ["ClubDetailsAcceptanceTest"]},
+      {"name": "Club information (about club)", "status": "out", "classes": ["ClubInformationAcceptanceTest"], "note": "Retired 2026-10-22, superseded by Club details (docs/testing/REBASELINE_2026-10-22.md)"},
+      {"name": "League standings", "status": "covered", "classes": ["StandingsAcceptanceTest"]},
+      {"name": "Default Club data consistency (E2E)", "status": "covered", "classes": ["ZulfiDataConsistencyE2ETest", "ClubDataRulesTest"]},
+      {"name": "Match schedule", "status": "covered", "classes": ["MatchScheduleBrowseAcceptanceTest", "MatchScheduleRowRulesTest"]},
+      {"name": "Match schedule → analysis", "status": "partial", "classes": ["MatchScheduleAnalysisAcceptanceTest", "MchAnalysisCoverageContractTest", "MatchScheduleAnalysisGateContractTest"], "note": "Submit only with explicit authorization (phase c + create gates)"},
+      {"name": "Analysis status sync", "status": "covered", "classes": ["AnalysisStatusSyncAcceptanceTest"]},
+      {"name": "Create analysis (official fixture)", "status": "partial", "classes": ["OfficialFixtureDiscoveryTest", "OfficialFixturePreflightTest", "OfficialFixtureSelectionTest", "OfficialMatchAnalysisHappyPathTest", "DuplicateFixtureToastRulesTest", "TeamFieldDisplayRulesTest"], "note": "Create is gated: -Danalysis.create.enabled=true + ZULFI_OFFICIAL_FIXTURE"},
+      {"name": "Match type + official link", "status": "covered", "classes": ["MatchTypeOfficialAcceptanceTest"]},
+      {"name": "Friendly match metadata", "status": "covered", "classes": ["FriendlyMatchAcceptanceTest"]},
+      {"name": "Analyses browse / search / filter", "status": "covered", "classes": ["AnalysesListingAcceptanceTest"]},
+      {"name": "Analysis processing status", "status": "covered", "classes": ["AnalysisProcessingStatusAcceptanceTest"]},
+      {"name": "Framework contracts", "status": "covered", "classes": ["PhaseGatesContractTest", "BugReportContentContractTest", "DefectReportingContractTest"]}
+    ],
+    "zakaadash": [
+      {"name": "Authentication", "status": "covered", "classes": ["AuthenticationTests", "ZakaaDashCredentialsTest"]},
+      {"name": "Data upload", "status": "covered", "classes": ["FileSelectionTests", "UploadModalTests"]},
+      {"name": "Data versions", "status": "covered", "classes": ["DataVersionsTests"]},
+      {"name": "Preprocessing entry", "status": "covered", "classes": ["PreprocessingEntryTests"]},
+      {"name": "Preprocessing wizard navigation", "status": "covered", "classes": ["WizardNavigationTests"]},
+      {"name": "Preprocessing steps", "status": "covered", "classes": ["ProcessingSettingsTests", "DataReviewTests", "DataImprovementTests", "ProcessingResultsTests"]},
+      {"name": "E2E journeys", "status": "covered", "classes": ["DataUploadJourneyE2ETest", "AdvancedPreprocessingJourneyE2ETest", "FootballPreprocessingJourneyE2ETest"]},
+      {"name": "Framework demo (Heroku)", "status": "out", "classes": ["HerokuLoginTest"], "note": "Framework demo against the-internet.herokuapp.com, not ZakaaDash coverage"}
+    ]
+  }
+}

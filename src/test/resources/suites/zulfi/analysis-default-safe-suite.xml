@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- Default-safe Create Analysis acceptance (no submit, no HP). -->
+<suite name="Create Analysis Safe Acceptance" verbose="1" parallel="false">
+    <test name="Fixture Discovery">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.analysis.OfficialFixtureDiscoveryTest"/>
+        </classes>
+    </test>
+    <test name="Indexed Selection Smoke">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.analysis.OfficialFixtureSelectionTest"/>
+        </classes>
+    </test>
+</suite>

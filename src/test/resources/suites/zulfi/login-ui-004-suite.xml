@@ -1,0 +1,12 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="LOGIN-UI-004 Only" verbose="1" parallel="false">
+    <test name="LOGIN-UI-004">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.login.LoginRegressionTest">
+                <methods>
+                    <include name="loginUi004_emailInputInteraction"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+</suite>

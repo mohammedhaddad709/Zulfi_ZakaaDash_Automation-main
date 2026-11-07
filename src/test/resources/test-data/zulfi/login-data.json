@@ -1,0 +1,7 @@
+{
+  "user": {
+    "description": "Portal user for authenticated UI tests. Values are never stored here.",
+    "usernameEnv": "ZULFI_USER",
+    "passwordEnv": "ZULFI_PASSWORD"
+  }
+}

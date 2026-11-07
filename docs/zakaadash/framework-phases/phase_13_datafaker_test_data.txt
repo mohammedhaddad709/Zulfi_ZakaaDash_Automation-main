@@ -1,0 +1,39 @@
+# Phase 13 — DataFaker Test Data
+
+Read and follow AGENTS.md strictly.
+
+Implement Phase 13 only: DataFaker Test Data.
+
+Goal:
+Introduce generated fake data for scenarios that need dynamic dummy values.
+
+Use:
+- Current project stack
+- DataFaker
+
+New technology to add:
+- DataFaker
+
+Scope:
+- pom.xml
+- Test data utility/classes
+- Sample usage only
+
+Tasks:
+1. Add DataFaker dependency.
+2. Create a small fake data utility.
+3. Generate sample values like name, email, and phone.
+4. Add a simple demonstration usage without breaking the existing login test.
+
+Acceptance criteria:
+- DataFaker is available.
+- Fake data utility compiles.
+- Existing tests still pass.
+- mvn clean test runs successfully.
+
+Run/validation command:
+- mvn clean test
+
+Important:
+Do not use fake data for Heroku login credentials.
+Do not generate sensitive data.

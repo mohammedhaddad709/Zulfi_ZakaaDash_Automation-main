@@ -1,0 +1,9 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- US-FAP-CLUB-001 — enable with -Dclub.info.phase=a|b|c -->
+<suite name="Club Information About Club" verbose="1" parallel="false">
+    <test name="CLUB-INF Acceptance">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.clubinfo.ClubInformationAcceptanceTest"/>
+        </classes>
+    </test>
+</suite>

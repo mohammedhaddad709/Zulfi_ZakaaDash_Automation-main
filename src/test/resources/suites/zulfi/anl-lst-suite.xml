@@ -1,0 +1,9 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- US-FAP-ANL-003 — enable with -Danl.lst.phase=a|b|c|d -->
+<suite name="Analyses Listing" verbose="1" parallel="false">
+    <test name="ANL-LST Acceptance">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.analysis.listing.AnalysesListingAcceptanceTest"/>
+        </classes>
+    </test>
+</suite>

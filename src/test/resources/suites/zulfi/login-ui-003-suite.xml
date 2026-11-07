@@ -1,0 +1,12 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="LOGIN-UI-003 Only" verbose="1" parallel="false">
+    <test name="LOGIN-UI-003">
+        <classes>
+            <class name="com.taf.systems.zulfi.features.login.LoginRegressionTest">
+                <methods>
+                    <include name="loginUi003_showHidePassword"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+</suite>

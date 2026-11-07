@@ -1,0 +1,65 @@
+# Phase 1 — First Working Selenium + TestNG Login Test
+
+Read and follow AGENTS.md strictly.
+
+Implement Phase 1 only: First Working Selenium + TestNG Login Test.
+
+Goal:
+Create the simplest working UI automation test using Selenium WebDriver and TestNG.
+
+Application:
+https://the-internet.herokuapp.com/login
+
+Valid credentials:
+username: tomsmith
+password: SuperSecretPassword!
+
+Use:
+- Java 25
+- Maven
+- Selenium WebDriver
+- Selenium Manager
+- TestNG
+- Local Chrome execution
+
+New technology to add:
+- Selenium WebDriver
+- TestNG
+- Maven Compiler Plugin
+- Maven Surefire Plugin
+
+Scope:
+- pom.xml
+- One TestNG test class only
+
+Tasks:
+1. Create or update pom.xml.
+2. Configure Java 25.
+3. Add Selenium WebDriver.
+4. Add TestNG.
+5. Add Maven Compiler Plugin.
+6. Add Maven Surefire Plugin.
+7. Create HerokuLoginTest.
+8. Create ChromeDriver directly inside the test for now.
+9. Open the login page.
+10. Enter username and password.
+11. Click Login.
+12. Assert successful login.
+13. Quit the browser in cleanup.
+
+Acceptance criteria:
+- mvn clean test runs successfully.
+- Chrome opens.
+- Login page opens.
+- Login succeeds.
+- Assertion passes.
+- Browser closes after execution.
+
+Run/validation command:
+- mvn clean test
+
+Important:
+This is intentionally a simple first test.
+Do not refactor to framework structure yet.
+Do not create Page Objects yet.
+Do not add any technology not listed in this phase.

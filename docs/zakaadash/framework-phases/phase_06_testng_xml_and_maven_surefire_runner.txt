@@ -1,0 +1,38 @@
+# Phase 6 — TestNG XML and Maven Surefire Runner
+
+Read and follow AGENTS.md strictly.
+
+Implement Phase 6 only: TestNG XML and Maven Surefire Runner.
+
+Goal:
+Run tests through TestNG XML using Maven.
+
+Use:
+- Current project stack
+- TestNG XML
+- Maven Surefire Plugin
+
+New technology to add:
+- None unless Surefire is missing
+
+Scope:
+- testng.xml
+- pom.xml Surefire configuration if needed
+
+Tasks:
+1. Create testng.xml under src/test/resources.
+2. Add HerokuLoginTest to the suite.
+3. Configure Surefire to run testng.xml if needed.
+4. Ensure mvn clean test uses the suite.
+
+Acceptance criteria:
+- testng.xml exists.
+- Test runs through TestNG XML.
+- mvn clean test passes.
+
+Run/validation command:
+- mvn clean test
+
+Important:
+Do not add parallel execution yet.
+Do not add multiple suites yet.

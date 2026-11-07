@@ -1,0 +1,137 @@
+{
+  "_comment": "One-click run presets per system (class names relative to com.taf.systems.). Missing classes are ignored. phaseKeys drive the 'Set all gates' helper; 'max' caps a key below its submit phase. Submit/create gates (analysis.create.enabled, ...) are never set here.",
+  "zulfi": {
+    "phaseKeys": [
+      {"key": "home.overview.phase", "max": "c"},
+      {"key": "home.current.results.phase", "max": "c"},
+      {"key": "clubs.yellow.phase", "max": "c"},
+      {"key": "club.info.phase", "max": "c"},
+      {"key": "club.details.phase", "max": "c"},
+      {"key": "standings.phase", "max": "c"},
+      {"key": "club.data.phase", "max": "b"},
+      {"key": "mch.schedule.phase", "max": "c"},
+      {"key": "match.schedule.analysis.phase", "max": "b"},
+      {"key": "anl.sync.phase", "max": "c"},
+      {"key": "anl.sts.phase", "max": "c"},
+      {"key": "anl.lst.phase", "max": "c"},
+      {"key": "anl.match.type.phase", "max": "c"},
+      {"key": "anl.friendly.phase", "max": "c"}
+    ],
+    "presets": [
+      {
+        "id": "login",
+        "title": "Login",
+        "subtitle": "Tier 0 · login happy path + regression",
+        "icon": "key",
+        "pace": "fast",
+        "classes": [
+          "zulfi.features.login.LoginHappyPathTest",
+          "zulfi.features.login.LoginRegressionTest"
+        ],
+        "phase": ""
+      },
+      {
+        "id": "smoke",
+        "title": "Smoke",
+        "subtitle": "Tier 1 · every page, phase a, read-only",
+        "icon": "zap",
+        "pace": "fast",
+        "classes": [
+          "zulfi.features.home.HomeOverviewAcceptanceTest",
+          "zulfi.features.home.HomeCurrentResultsAcceptanceTest",
+          "zulfi.features.clubs.ClubsBrowseAcceptanceTest",
+          "zulfi.features.clubdetails.ClubDetailsAcceptanceTest",
+          "zulfi.features.standings.StandingsAcceptanceTest",
+          "zulfi.features.matchschedule.MatchScheduleBrowseAcceptanceTest",
+          "zulfi.features.matchschedule.AnalysisStatusSyncAcceptanceTest",
+          "zulfi.features.analysis.status.AnalysisProcessingStatusAcceptanceTest",
+          "zulfi.features.analysis.listing.AnalysesListingAcceptanceTest"
+        ],
+        "phase": "a"
+      },
+      {
+        "id": "club-data",
+        "title": "Club data E2E",
+        "subtitle": "Home ↔ schedule ↔ standings ↔ club page",
+        "icon": "shield",
+        "pace": "fast",
+        "classes": [
+          "zulfi.features.clubdata.ZulfiDataConsistencyE2ETest",
+          "zulfi.features.clubdetails.ClubDetailsAcceptanceTest",
+          "zulfi.features.standings.StandingsAcceptanceTest"
+        ],
+        "phase": "c"
+      },
+      {
+        "id": "regression",
+        "title": "Regression",
+        "subtitle": "Tier 2 · live data, phases b/c, no submit",
+        "icon": "layers",
+        "pace": "fast",
+        "classes": [
+          "zulfi.features.login.LoginRegressionTest",
+          "zulfi.features.home.HomeOverviewAcceptanceTest",
+          "zulfi.features.home.HomeCurrentResultsAcceptanceTest",
+          "zulfi.features.clubs.ClubsBrowseAcceptanceTest",
+          "zulfi.features.clubdetails.ClubDetailsAcceptanceTest",
+          "zulfi.features.standings.StandingsAcceptanceTest",
+          "zulfi.features.clubdata.ZulfiDataConsistencyE2ETest",
+          "zulfi.features.matchschedule.MatchScheduleBrowseAcceptanceTest",
+          "zulfi.features.matchschedule.MatchScheduleAnalysisAcceptanceTest",
+          "zulfi.features.matchschedule.AnalysisStatusSyncAcceptanceTest",
+          "zulfi.features.analysis.status.AnalysisProcessingStatusAcceptanceTest",
+          "zulfi.features.analysis.listing.AnalysesListingAcceptanceTest",
+          "zulfi.features.analysis.matchtype.MatchTypeOfficialAcceptanceTest",
+          "zulfi.features.analysis.friendly.FriendlyMatchAcceptanceTest"
+        ],
+        "phase": "c"
+      },
+      {
+        "id": "unit",
+        "title": "Unit & contracts",
+        "subtitle": "No browser · rules and reporting contracts",
+        "icon": "check",
+        "pace": "fast",
+        "classes": [
+          "zulfi.clubdata.ClubDataRulesTest",
+          "zulfi.validations.DuplicateFixtureToastRulesTest",
+          "zulfi.validations.TeamFieldDisplayRulesTest",
+          "zulfi.config.MatchScheduleAnalysisGateContractTest",
+          "zulfi.reporting.DefectReportingContractTest",
+          "zulfi.reporting.BugReportContentContractTest",
+          "zulfi.login.LoginRegressionSuiteGuardContractTest"
+        ],
+        "phase": ""
+      }
+    ]
+  },
+  "zakaadash": {
+    "phaseKeys": [],
+    "presets": [
+      {
+        "id": "zd-e2e",
+        "title": "E2E journeys",
+        "subtitle": "Upload + preprocessing journeys",
+        "icon": "layers",
+        "pace": "fast",
+        "classes": [
+          "zakaadash.tests.e2e.DataUploadJourneyE2ETest",
+          "zakaadash.tests.e2e.AdvancedPreprocessingJourneyE2ETest",
+          "zakaadash.tests.e2e.FootballPreprocessingJourneyE2ETest"
+        ],
+        "phase": ""
+      },
+      {
+        "id": "zd-auth",
+        "title": "Authentication",
+        "subtitle": "Login checks",
+        "icon": "key",
+        "pace": "fast",
+        "classes": [
+          "zakaadash.tests.auth.AuthenticationTests"
+        ],
+        "phase": ""
+      }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "testCaseId": "PP-E2E-001",
+  "title": "Advanced Preprocessing happy path with default settings",
+  "dataset": "../../../uploads/football/zd_football_roi_raw.csv",
+  "sourceNamePrefix": "AUTO_PP_E2E_SRC",
+  "category": "",
+  "settings": {},
+  "expected": {
+    "processedCopyPrefix": "AUTO_PP_RESULT"
+  }
+}
